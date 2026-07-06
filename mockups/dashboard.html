@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NextGen — Dashboard (Mockup)</title>
+  <link rel="stylesheet" href="mockups.css" />
+</head>
+<body class="ng-shell" data-role="admin">
+  <aside class="ng-sidebar">
+    <div class="ng-sidebar-brand">
+      <img src="../design-system/reference/icon-ninja.png" alt="" />
+      <span>NextGen</span>
+    </div>
+    <nav class="ng-sidebar-nav">
+      <a class="ng-nav-item active" href="dashboard.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a class="ng-nav-item" href="team-board.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Team Board
+      </a>
+      <div class="ng-mgmt-only">
+        <div class="ng-sidebar-label">Management</div>
+        <a class="ng-nav-item" href="analytics.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          Analytics
+        </a>
+        <a class="ng-nav-item ng-admin-only" href="user-management.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Users & Roles
+        </a>
+        <a class="ng-nav-item ng-admin-only" href="settings.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Settings
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="ng-content">
+    <header class="ng-header">
+      <h1 class="ng-header-title">Dashboard</h1>
+      <div class="ng-header-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="search" placeholder="Search courses, materials…" />
+      </div>
+      <div class="ng-header-actions">
+        <button class="ng-icon-btn" type="button" aria-label="Notifications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="ng-notif-dot"></span>
+        </button>
+        <div class="ng-user-profile">
+          <span class="ng-user-name">Dini</span>
+          <span class="ng-avatar">D</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="ng-main">
+      <p class="ng-section-label">My Performance</p>
+
+      <!-- Hero card -->
+      <section class="ng-hero">
+        <div class="ng-hero-inner">
+          <div class="ng-hero-badge">📈 # The Climb Continues — Global Rank #12</div>
+          <h2>Good morning, Dini!</h2>
+          <p>Every step forward counts! You didn't make the global top 3 this time, but you are well on your way. Keep up the momentum and stay focused on your learning goals.</p>
+          <div class="ng-hero-actions">
+            <a href="team-board.html" class="ng-btn ng-btn--brand">View Team Board</a>
+            <button type="button" class="ng-btn ng-btn--ghost">Continue Course</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Metric cards -->
+      <div class="ng-metrics">
+        <article class="ng-metric">
+          <div class="ng-metric-icon ng-metric-icon--red">📚</div>
+          <div class="ng-metric-value">4</div>
+          <div class="ng-metric-label">Courses completed</div>
+          <div class="ng-metric-trend ng-metric-trend--up">↗ 50% of assigned</div>
+        </article>
+        <article class="ng-metric">
+          <div class="ng-metric-icon ng-metric-icon--blue">🎯</div>
+          <div class="ng-metric-value">87%</div>
+          <div class="ng-metric-label">Average score</div>
+          <div class="ng-metric-trend ng-metric-trend--up">↗ +5% vs last month</div>
+        </article>
+        <article class="ng-metric">
+          <div class="ng-metric-icon ng-metric-icon--gold">⏱</div>
+          <div class="ng-metric-value">6.5</div>
+          <div class="ng-metric-label">Hours studied this week</div>
+          <div class="ng-metric-trend ng-metric-trend--up">↗ +1.2 hrs vs last week</div>
+        </article>
+        <article class="ng-metric">
+          <div class="ng-metric-icon ng-metric-icon--green">🚀</div>
+          <div class="ng-metric-value">2</div>
+          <div class="ng-metric-label">Courses in progress</div>
+          <div class="ng-metric-trend ng-metric-trend--neutral">keep going!</div>
+        </article>
+      </div>
+
+      <!-- Pipeline + region panels -->
+      <div class="ng-panels">
+        <div class="ng-panel">
+          <div class="ng-panel-header">
+            <h3>Module completion by stage</h3>
+            <span>4 of 8 done</span>
+          </div>
+          <div class="ng-pipeline">
+            <div class="ng-stage ng-stage--1">
+              <span class="ng-stage-label">Not started</span>
+              <span class="ng-stage-value">2</span>
+            </div>
+            <div class="ng-stage ng-stage--2">
+              <span class="ng-stage-label">In progress</span>
+              <span class="ng-stage-value">2</span>
+            </div>
+            <div class="ng-stage ng-stage--3">
+              <span class="ng-stage-label">Passed</span>
+              <span class="ng-stage-value">3</span>
+            </div>
+            <div class="ng-stage ng-stage--4">
+              <span class="ng-stage-label">Failed</span>
+              <span class="ng-stage-value">1</span>
+            </div>
+          </div>
+        </div>
+        <div class="ng-panel">
+          <div class="ng-panel-header">
+            <h3>Progress by team</h3>
+          </div>
+          <div class="ng-list-bar">
+            <div class="ng-list-bar-header"><span>Logistics Ops</span><span>72%</span></div>
+            <div class="ng-list-bar-track"><div class="ng-list-bar-fill" style="width:72%"></div></div>
+          </div>
+          <div class="ng-list-bar">
+            <div class="ng-list-bar-header"><span>Last Mile — East</span><span>45%</span></div>
+            <div class="ng-list-bar-track"><div class="ng-list-bar-fill" style="width:45%;background:var(--ng-info)"></div></div>
+          </div>
+          <div class="ng-list-bar">
+            <div class="ng-list-bar-header"><span>Hub Operations</span><span>30%</span></div>
+            <div class="ng-list-bar-track"><div class="ng-list-bar-fill" style="width:30%;background:var(--ng-gold)"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="ng-charts-row">
+        <div class="ng-panel">
+          <div class="ng-panel-header"><h3>Module Completion</h3></div>
+          <div class="ng-chart-placeholder">
+            <div class="ng-bar" style="height:45%"></div>
+            <div class="ng-bar" style="height:70%"></div>
+            <div class="ng-bar" style="height:55%"></div>
+            <div class="ng-bar" style="height:90%"></div>
+            <div class="ng-bar" style="height:60%"></div>
+            <div class="ng-bar" style="height:40%"></div>
+          </div>
+        </div>
+        <div class="ng-panel">
+          <div class="ng-panel-header"><h3>Progress Overview</h3></div>
+          <div style="display:flex;align-items:center;justify-content:center;height:180px;">
+            <div class="ng-donut"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <nav class="mockup-banner">
+    <span>Mockup:</span>
+    <a href="index.html">Hub</a>
+    <a href="login.html">Login</a>
+    <span class="active">Dashboard</span>
+    <a href="team-board.html">Team Board</a>
+  </nav>
+</body>
+</html>

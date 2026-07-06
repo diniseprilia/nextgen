@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="/" />
+  <title>NextGen — Ninja Van Rookie Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/index.css" />
+</head>
+<body>
+  <!-- Login -->
+  <div id="view-login" class="view">
+    <div class="ng-login">
+      <aside class="ng-login-brand">
+        <div class="ng-brand-lockup">
+          <img src="design-system/reference/icon-ninja.png" alt="" class="ng-brand-icon" />
+          <span class="ng-wordmark">NextGen</span>
+        </div>
+        <div class="ng-login-hero">
+          <h1>Start your rookie journey</h1>
+          <p>The learning portal for Ninja Van rookies — master processes, take assessments, and climb the leaderboard.</p>
+        </div>
+        <img src="design-system/reference/icon-ninja.png" alt="" class="ng-login-illustration" aria-hidden="true" />
+      </aside>
+      <main class="ng-login-form-panel">
+        <div class="ng-login-card">
+          <div id="login-panel">
+            <h2>Glad to see you back!</h2>
+            <p class="ng-login-sub">Sign in with your Ninja Van Google account</p>
+            <div class="ng-login-actions">
+              <div id="google-signin-btn"></div>
+              <p id="login-origin-hint" class="muted hidden" style="margin-top:var(--ng-space-3);font-size:0.8125rem;"></p>
+              <p id="login-error" class="error-text hidden"></p>
+              <p class="muted" style="margin-top:var(--ng-space-4);font-size:0.875rem;">Use your <strong>@ninjavan.co</strong> Google account. New users are registered automatically on first sign-in.</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- App -->
+  <div id="view-app" class="view ng-shell hidden">
+    <aside class="ng-sidebar">
+      <div class="ng-sidebar-brand">
+        <img src="design-system/reference/icon-ninja.png" alt="" />
+        <span>NextGen</span>
+      </div>
+      <nav class="ng-sidebar-nav" id="sidebar-nav"></nav>
+    </aside>
+
+    <div class="ng-content">
+      <header class="ng-header">
+        <h1 class="ng-header-title" id="page-title">Dashboard</h1>
+        <div class="ng-header-actions">
+          <div class="ng-user-profile" id="user-chip"></div>
+          <button type="button" id="btn-logout" class="ng-btn ng-btn--outline">Logout</button>
+        </div>
+      </header>
+
+      <main class="ng-main">
+        <section id="page-dashboard" class="page">
+          <p class="ng-section-label">My Performance</p>
+          <div id="global-gamification"></div>
+          <div id="dashboard-metrics" class="ng-metrics"></div>
+          <div class="charts-row">
+            <div class="chart-panel"><h3>Module Completion</h3><canvas id="chart-completion"></canvas></div>
+            <div class="chart-panel"><h3>Progress Overview</h3><canvas id="chart-progress"></canvas></div>
+            <div class="chart-panel chart-wide"><h3>Weekly Hours Studied</h3><canvas id="chart-hours"></canvas></div>
+          </div>
+          <div id="team-progress-section"></div>
+        </section>
+
+        <section id="page-team" class="page hidden">
+          <div class="ng-toolbar">
+            <div style="display:flex;align-items:center;gap:var(--ng-space-3);">
+              <label for="team-selector" class="muted">Team</label>
+              <select id="team-selector" class="ng-select"></select>
+            </div>
+          </div>
+          <div id="team-performance-hero"></div>
+          <div class="ng-tabs" id="team-tabs">
+            <button type="button" class="ng-tab active" data-tab="courses">Courses</button>
+            <button type="button" class="ng-tab" data-tab="mates">Team Mates</button>
+            <button type="button" class="ng-tab" data-tab="materials">Materials</button>
+          </div>
+          <div id="team-tab-courses" class="tab-panel"></div>
+          <div id="team-tab-mates" class="tab-panel hidden">
+            <div id="mates-tab-actions" class="ng-tab-panel-actions ng-mgmt-only hidden"></div>
+            <div id="mates-list"></div>
+          </div>
+          <div id="team-tab-materials" class="tab-panel hidden">
+            <div id="materials-tab-actions" class="ng-tab-panel-actions ng-mgmt-only hidden">
+              <button type="button" id="btn-add-material" class="ng-btn ng-btn--dark">+ Add Material</button>
+            </div>
+            <div id="materials-list"></div>
+          </div>
+        </section>
+
+        <section id="page-analytics" class="page hidden">
+          <div class="ng-toolbar">
+            <div style="display:flex;align-items:center;gap:var(--ng-space-3);">
+              <label class="muted">Course</label>
+              <select id="analytics-course-select" class="ng-select"></select>
+            </div>
+            <div style="display:flex;align-items:center;gap:var(--ng-space-3);">
+              <label class="muted">Team</label>
+              <select id="analytics-team-select" class="ng-select"></select>
+            </div>
+          </div>
+          <div class="ng-analytics-tabs">
+            <button type="button" class="ng-tab active" data-analytics="results">Teammate Results</button>
+            <button type="button" class="ng-tab hidden" data-analytics="questions" hidden>Question Performance</button>
+          </div>
+          <div id="analytics-results"></div>
+          <div id="analytics-questions" class="hidden" hidden></div>
+        </section>
+
+        <section id="page-users" class="page hidden">
+          <div class="ng-segment-control" id="users-segments">
+            <button type="button" class="ng-segment active" data-seg="teams">Teams</button>
+            <button type="button" class="ng-segment" data-seg="users">All users</button>
+            <button type="button" class="ng-segment ng-superadmin-only hidden" data-seg="admins">Admins</button>
+          </div>
+          <div id="users-seg-teams">
+            <div class="ng-tab-panel-actions">
+              <button type="button" id="btn-invite-user" class="ng-btn ng-btn--outline hidden">+ Invite to team</button>
+              <button type="button" id="btn-add-team" class="ng-btn ng-btn--dark">+ Create team</button>
+            </div>
+            <div id="teams-management"></div>
+          </div>
+          <div id="users-seg-users" class="hidden"><div id="users-list"></div></div>
+          <div id="users-seg-admins" class="hidden ng-superadmin-only">
+            <div class="ng-tab-panel-actions"><button type="button" id="btn-add-user" class="ng-btn ng-btn--dark">+ Assign admin</button></div>
+            <div id="admins-list"></div>
+          </div>
+        </section>
+
+        <section id="page-settings" class="page hidden">
+          <div class="ng-settings-card">
+            <h3>Gemini API Key</h3>
+            <p>Used by the server to generate quiz questions from course materials. You can also set <code>GEMINI_API_KEY</code> in <code>.env</code>. Falls back to a local parser if no key is configured.</p>
+            <div class="ng-field">
+              <label class="ng-label" for="gemini-api-key">API key</label>
+              <div class="ng-api-key-field">
+                <input class="ng-input" type="password" id="gemini-api-key" placeholder="Enter your Google Gemini API key" />
+                <button type="button" class="ng-api-key-toggle" id="toggle-api-key">Show</button>
+              </div>
+            </div>
+            <button type="button" id="btn-save-settings" class="ng-btn ng-btn--brand">Save settings</button>
+          </div>
+        </section>
+
+        <section id="page-course-result" class="page hidden">
+          <nav class="ng-breadcrumb" id="course-result-breadcrumb"></nav>
+          <div id="course-result-content"></div>
+        </section>
+
+        <section id="page-course-intro" class="page hidden">
+          <nav class="ng-breadcrumb" id="course-intro-breadcrumb"></nav>
+          <div id="course-intro-content"></div>
+        </section>
+
+        <section id="page-course-mgmt-review" class="page hidden">
+          <nav class="ng-breadcrumb" id="course-mgmt-breadcrumb"></nav>
+          <div id="course-mgmt-review-content"></div>
+        </section>
+
+        <section id="page-quiz" class="page hidden">
+          <nav class="ng-breadcrumb" id="quiz-breadcrumb"></nav>
+          <div id="quiz-content" class="ng-quiz-card"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="ng-toast ng-toast--success" id="ng-toast"></div>
+  <div class="ng-loader-overlay" id="ng-loader">
+    <div><div class="ng-spinner" style="margin:0 auto;"></div><p class="ng-loader-text" id="loader-text">Loading…</p></div>
+  </div>
+
+  <dialog id="dialog-alert">
+    <div class="dialog-body"><p id="dialog-alert-message"></p></div>
+    <div class="dialog-actions dialog-actions-center"><button type="button" class="ng-btn ng-btn--brand" id="dialog-alert-ok">OK</button></div>
+  </dialog>
+  <dialog id="dialog-confirm">
+    <form method="dialog" class="dialog-form">
+      <div class="dialog-body">
+        <h3 id="dialog-confirm-title">Confirm</h3>
+        <p id="dialog-confirm-message"></p>
+      </div>
+      <div class="dialog-actions dialog-actions-center">
+        <button type="button" value="cancel" class="ng-btn ng-btn--outline" id="dialog-cancel">Cancel</button>
+        <button type="submit" value="confirm" class="ng-btn ng-btn--brand" id="dialog-confirm-btn">Confirm</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dialog-material">
+    <form id="material-form" method="dialog" class="dialog-form">
+      <div class="dialog-body">
+        <h3 id="material-dialog-title">Add Material</h3>
+        <label><span>Title</span><input type="text" name="title" required /></label>
+        <label><span>Group / Category</span><input type="text" name="group" required /></label>
+        <fieldset class="material-source-fieldset">
+          <legend>Material source</legend>
+          <label class="inline-radio"><input type="radio" name="sourceType" value="file" checked /> Upload file</label>
+          <label class="inline-radio"><input type="radio" name="sourceType" value="url" /> External URL</label>
+        </fieldset>
+        <div id="material-file-fields">
+          <label><span>Upload file (PDF, Word, PowerPoint)</span>
+            <input type="file" id="material-file" name="file" accept=".pdf,.doc,.docx,.ppt,.pptx" />
+          </label>
+          <p class="muted" style="font-size:var(--ng-text-sm);margin:0;">Supported: PDF, DOC, DOCX, PPT, PPTX. Other formats are rejected.</p>
+        </div>
+        <div id="material-url-fields" class="hidden">
+          <label><span>Source URL</span><input type="url" name="sourceUrl" placeholder="https://…" /></label>
+          <p class="muted" style="font-size:var(--ng-text-sm);margin:0;">View opens the external page in a new tab.</p>
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="ng-btn ng-btn--outline" onclick="this.closest('dialog').close()">Cancel</button>
+        <button type="submit" class="ng-btn ng-btn--brand">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dialog-material-view" class="dialog-wide">
+    <div class="ng-dialog-header" style="padding:var(--ng-space-5) var(--ng-space-6);border-bottom:1px solid var(--ng-border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+      <h3 id="material-view-title" style="margin:0;">Material</h3>
+      <button type="button" class="ng-dialog-close" id="material-view-close">×</button>
+    </div>
+    <div class="dialog-body">
+      <div class="ng-file-meta" id="material-view-meta" style="margin-bottom:var(--ng-space-4);"></div>
+      <div class="ng-file-preview" id="material-view-body"></div>
+    </div>
+    <div class="dialog-actions" id="material-view-footer"></div>
+  </dialog>
+
+  <dialog id="dialog-course" class="dialog-wide">
+    <form id="course-form" class="dialog-form">
+      <div class="dialog-body">
+        <h3 id="course-dialog-title">Create Course</h3>
+        <div class="ng-form-section">
+          <h4 style="margin-bottom:var(--ng-space-4);">Course details</h4>
+          <div class="form-grid">
+            <label><span>Title</span><input type="text" name="title" required /></label>
+            <label><span>Min Score (%)</span><input type="number" name="minScore" min="0" max="100" value="80" required /></label>
+            <label class="span-2"><span>Description</span><textarea name="description" rows="2" class="ng-textarea" required></textarea></label>
+          </div>
+        </div>
+        <div class="ng-form-section">
+          <h4 style="margin-bottom:var(--ng-space-4);">Materials</h4>
+          <div class="material-picker-row">
+            <label class="material-picker-col"><span>Select materials (Ctrl/Cmd + click)</span><select name="materialIds" id="course-materials-select" multiple size="5" required></select></label>
+            <div class="material-selected-col"><span class="field-label">Selected Materials</span><ul id="course-materials-selected" class="selected-materials-list"></ul></div>
+          </div>
+        </div>
+        <div class="ng-form-section">
+          <h4 style="margin-bottom:var(--ng-space-4);">Question generation</h4>
+          <div class="format-picker"><span class="field-label">Question Formats</span>
+            <div class="format-checkboxes">
+              <label class="checkbox-label"><input type="checkbox" name="formats" value="multiple" checked /> Multiple Choice</label>
+              <label class="checkbox-label"><input type="checkbox" name="formats" value="truefalse" /> True/False</label>
+              <label class="checkbox-label"><input type="checkbox" name="formats" value="short" /> Short Answer</label>
+            </div>
+          </div>
+          <div class="form-grid" style="margin-top:var(--ng-space-4);">
+            <label><span>Question Count</span><input type="number" name="questionCount" min="1" max="20" value="5" required /></label>
+            <label><span>Open Date</span><input type="date" name="openDate" /></label>
+            <label><span>Close Date (optional)</span><input type="date" name="closeDate" /></label>
+          </div>
+        </div>
+      </div>
+      <div class="dialog-actions" style="justify-content:space-between;">
+        <button type="button" class="ng-btn ng-btn--outline" id="course-delete-btn" style="color:var(--ng-error);border-color:var(--ng-error);">Delete course</button>
+        <div style="display:flex;gap:var(--ng-space-3);flex-wrap:wrap;">
+          <button type="button" class="ng-btn ng-btn--outline" id="course-form-cancel">Cancel</button>
+          <button type="button" class="ng-btn ng-btn--outline" id="course-save-draft">Save draft</button>
+          <button type="button" class="ng-btn ng-btn--outline" id="course-generate-btn" disabled>Generate questions</button>
+          <button type="submit" class="ng-btn ng-btn--brand" id="course-publish-btn" disabled>Publish</button>
+        </div>
+      </div>
+    </form>
+    <div id="course-review" class="hidden dialog-body"></div>
+  </dialog>
+
+  <dialog id="dialog-invite">
+    <form id="invite-form" method="dialog" class="dialog-form">
+      <div class="dialog-body">
+        <h3>Invite to team</h3>
+        <p class="muted">Search registered users and add them to a team. Users must have signed in at least once.</p>
+        <label><span>Search user</span><input type="search" id="invite-user-search" placeholder="Name or email…" autocomplete="off" /></label>
+        <div id="invite-user-results" class="invite-user-results"></div>
+        <input type="hidden" name="userId" id="invite-user-id" />
+        <p id="invite-selected-user" class="muted hidden"></p>
+        <label><span>Team</span><select name="teamId" id="invite-team-select" required></select></label>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="ng-btn ng-btn--outline" onclick="this.closest('dialog').close()">Cancel</button>
+        <button type="submit" class="ng-btn ng-btn--brand">Invite</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dialog-promote-admin">
+    <form id="promote-admin-form" method="dialog" class="dialog-form">
+      <div class="dialog-body">
+        <h3>Assign Admin</h3>
+        <p class="muted">Search a registered user to promote to Admin.</p>
+        <label><span>Search user</span><input type="search" id="promote-user-search" placeholder="Name or email…" autocomplete="off" /></label>
+        <div id="promote-user-results" class="invite-user-results"></div>
+        <input type="hidden" name="userId" id="promote-user-id" />
+        <p id="promote-selected-user" class="muted hidden"></p>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="ng-btn ng-btn--outline" onclick="this.closest('dialog').close()">Cancel</button>
+        <button type="submit" class="ng-btn ng-btn--brand">Promote to Admin</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dialog-team">
+    <form id="team-form" method="dialog" class="dialog-form">
+      <div class="dialog-body">
+        <h3>Create Team</h3>
+        <label><span>Team name</span><input type="text" name="name" required placeholder="e.g. Logistics Operations" /></label>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="ng-btn ng-btn--outline" onclick="this.closest('dialog').close()">Cancel</button>
+        <button type="submit" class="ng-btn ng-btn--brand">Create</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dialog-attempt-history" class="dialog-wide">
+    <div class="dialog-body">
+      <h3>Answer History</h3>
+      <div id="attempt-history-content"></div>
+    </div>
+    <div class="dialog-actions"><button type="button" class="ng-btn ng-btn--brand" onclick="this.closest('dialog').close()">Close</button></div>
+  </dialog>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

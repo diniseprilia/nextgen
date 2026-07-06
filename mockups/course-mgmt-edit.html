@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NextGen — Edit Course (Mockup)</title>
+  <link rel="stylesheet" href="mockups.css" />
+</head>
+<body class="ng-shell" data-role="master">
+  <aside class="ng-sidebar">
+    <div class="ng-sidebar-brand">
+      <img src="../design-system/reference/icon-ninja.png" alt="" />
+      <span>NextGen</span>
+    </div>
+    <nav class="ng-sidebar-nav">
+      <a class="ng-nav-item" href="dashboard.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a class="ng-nav-item active" href="team-board.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Team Board
+      </a>
+      <div class="ng-mgmt-only">
+        <div class="ng-sidebar-label">Management</div>
+        <a class="ng-nav-item" href="analytics.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Analytics</a>
+        <a class="ng-nav-item ng-admin-only" href="user-management.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Users & Roles</a>
+        <a class="ng-nav-item ng-admin-only" href="settings.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Settings</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="ng-content">
+    <header class="ng-header">
+      <h1 class="ng-header-title">Course Management</h1>
+      <div class="ng-header-actions">
+        <div class="ng-user-profile"><span class="ng-user-name">Maya (Master)</span><span class="ng-avatar">M</span></div>
+      </div>
+    </header>
+    <main class="ng-main">
+      <p class="ng-meta-text">Edit course dialog opens below (from Team Board → Course Management → Edit).</p>
+    </main>
+  </div>
+
+  <!-- Edit course dialog -->
+  <div class="ng-dialog-backdrop" id="edit-dialog">
+    <div class="ng-dialog ng-dialog--wide" role="dialog" aria-labelledby="edit-title">
+      <div class="ng-dialog-header">
+        <h3 id="edit-title">Edit course</h3>
+        <a href="team-board.html#management" class="ng-dialog-close" aria-label="Close">×</a>
+      </div>
+      <div class="ng-dialog-body">
+        <form id="course-form">
+          <!-- Course details -->
+          <div class="ng-form-section">
+            <h4>Course details</h4>
+            <div class="ng-field">
+              <label class="ng-label" for="title">Title <span class="ng-required">*</span></label>
+              <input class="ng-input" type="text" id="title" value="Ops Basics 101" />
+            </div>
+            <div class="ng-field">
+              <label class="ng-label" for="desc">Description</label>
+              <textarea class="ng-textarea" id="desc">Introductory course for logistics dispatch routing.</textarea>
+            </div>
+          </div>
+
+          <!-- Materials -->
+          <div class="ng-form-section">
+            <h4>Materials <span class="ng-required">*</span></h4>
+            <div class="ng-material-picker">
+              <div>
+                <label class="ng-label" for="material-pick">Select materials</label>
+                <select class="ng-input ng-input--select" id="material-pick" multiple size="4" style="height:auto;padding:var(--ng-space-3);">
+                  <option>Delivery Operations Guide</option>
+                  <option>Last Mile Safety Handbook</option>
+                  <option>COD Operations Guide</option>
+                  <option>Hub Sorting Handbook</option>
+                </select>
+              </div>
+              <div>
+                <label class="ng-label">Selected materials</label>
+                <div class="ng-chip-list">
+                  <div class="ng-chip"><span>Delivery Operations Guide</span><button type="button" aria-label="Remove">×</button></div>
+                  <div class="ng-chip"><span>COD Operations Guide</span><button type="button" aria-label="Remove">×</button></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Question setup -->
+          <div class="ng-form-section">
+            <h4>Question generation</h4>
+            <div class="ng-field">
+              <span class="ng-label">Question formats</span>
+              <div class="ng-checkbox-group">
+                <label class="ng-checkbox-label"><input type="checkbox" checked /> Multiple Choice</label>
+                <label class="ng-checkbox-label"><input type="checkbox" checked /> True / False</label>
+                <label class="ng-checkbox-label"><input type="checkbox" /> Short Answer</label>
+              </div>
+            </div>
+            <div class="ng-form-row">
+              <div class="ng-field">
+                <label class="ng-label" for="qcount">Question count</label>
+                <input class="ng-input" type="number" id="qcount" value="10" min="1" />
+              </div>
+              <div class="ng-field">
+                <label class="ng-label" for="minscore">Min passing score (%)</label>
+                <input class="ng-input" type="number" id="minscore" value="80" min="0" max="100" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Publishing -->
+          <div class="ng-form-section">
+            <h4>Publishing</h4>
+            <div class="ng-form-row">
+              <div class="ng-field">
+                <label class="ng-label" for="status">Publish status</label>
+                <select class="ng-input ng-input--select" id="status">
+                  <option>Draft</option>
+                  <option selected>Open</option>
+                  <option>Closed</option>
+                </select>
+              </div>
+              <div class="ng-field">
+                <label class="ng-label" for="opendate">Open date</label>
+                <input class="ng-input" type="date" id="opendate" value="2026-06-01" />
+              </div>
+            </div>
+            <div class="ng-field">
+              <label class="ng-label" for="closedate">Close date (optional)</label>
+              <input class="ng-input" type="date" id="closedate" />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="ng-dialog-footer" style="justify-content:space-between;">
+        <button type="button" class="ng-btn ng-btn--outline" style="color:var(--ng-error);border-color:var(--ng-error);">Delete course</button>
+        <div style="display:flex;gap:var(--ng-space-3);">
+          <a href="team-board.html#management" class="ng-btn ng-btn--outline">Cancel</a>
+          <button type="button" class="ng-btn ng-btn--outline">Save draft</button>
+          <button type="button" class="ng-btn ng-btn--outline">Generate questions</button>
+          <a href="course-mgmt-view.html" class="ng-btn ng-btn--brand">Publish</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="mockup-banner">
+    <span>Mockup:</span>
+    <a href="index.html">Hub</a>
+    <a href="team-board.html#management">Course Mgmt</a>
+    <span class="active">Edit (dialog)</span>
+  </nav>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NextGen — Users & Roles (Mockup)</title>
+  <link rel="stylesheet" href="mockups.css" />
+</head>
+<body class="ng-shell" data-role="admin">
+  <aside class="ng-sidebar">
+    <div class="ng-sidebar-brand">
+      <img src="../design-system/reference/icon-ninja.png" alt="" />
+      <span>NextGen</span>
+    </div>
+    <nav class="ng-sidebar-nav">
+      <a class="ng-nav-item" href="dashboard.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a class="ng-nav-item" href="team-board.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Team Board
+      </a>
+      <div class="ng-mgmt-only">
+        <div class="ng-sidebar-label">Management</div>
+        <a class="ng-nav-item" href="analytics.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          Analytics
+        </a>
+        <a class="ng-nav-item ng-admin-only active" href="user-management.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Users & Roles
+        </a>
+        <a class="ng-nav-item ng-admin-only" href="settings.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Settings
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="ng-content">
+    <header class="ng-header">
+      <h1 class="ng-header-title">Users & Roles</h1>
+      <div class="ng-header-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="search" placeholder="Search users, teams…" />
+      </div>
+      <div class="ng-header-actions">
+        <div class="ng-user-profile"><span class="ng-user-name">Maya (Master)</span><span class="ng-avatar">M</span></div>
+      </div>
+    </header>
+
+    <main class="ng-main">
+      <div class="ng-segment-control" role="tablist">
+        <button class="ng-segment active" type="button" data-seg="teams">Teams</button>
+        <button class="ng-segment" type="button" data-seg="users">All users</button>
+        <button class="ng-segment ng-superadmin-only" type="button" data-seg="admins">Admins</button>
+      </div>
+
+      <!-- Teams -->
+      <div id="seg-teams">
+        <div class="ng-tab-panel-actions">
+          <button type="button" class="ng-btn ng-btn--dark">+ Create team</button>
+        </div>
+        <div class="ng-table-wrap">
+          <table class="ng-table">
+            <thead>
+              <tr>
+                <th>Team name</th>
+                <th>Members</th>
+                <th>Master</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Logistics Operations</strong></td>
+                <td>5</td>
+                <td>Maya Lim</td>
+                <td>
+                  <a href="#" class="ng-btn-link">Edit</a>
+                  <a href="#" class="ng-btn-link" style="color:var(--ng-error);">Remove</a>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Last Mile — East</strong></td>
+                <td>3</td>
+                <td>Alex Tan</td>
+                <td>
+                  <a href="#" class="ng-btn-link">Edit</a>
+                  <a href="#" class="ng-btn-link" style="color:var(--ng-error);">Remove</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- All users -->
+      <div id="seg-users" style="display:none;">
+        <div class="ng-table-wrap">
+          <table class="ng-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Teams</th>
+                <th>Last login</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Maya Lim</strong></td>
+                <td>maya@ninjavan.co</td>
+                <td><span class="ng-badge ng-badge--warning">Master</span></td>
+                <td>Logistics Operations</td>
+                <td>19 Jun 2026</td>
+              </tr>
+              <tr>
+                <td><strong>Dini</strong></td>
+                <td>dini@ninjavan.co</td>
+                <td><span class="ng-badge ng-badge--muted">Rookie</span></td>
+                <td>Logistics Operations</td>
+                <td>19 Jun 2026</td>
+              </tr>
+              <tr>
+                <td><strong>Alex Tan</strong></td>
+                <td>alex@ninjavan.co</td>
+                <td><span class="ng-badge ng-badge--muted">Rookie</span></td>
+                <td>Logistics Operations, Last Mile — East</td>
+                <td>18 Jun 2026</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Admins (Admin only) -->
+      <div id="seg-admins" class="ng-superadmin-only" style="display:none;">
+        <div class="ng-tab-panel-actions">
+          <button type="button" class="ng-btn ng-btn--dark">+ Assign admin</button>
+        </div>
+        <div class="ng-alert ng-alert--info" style="margin-bottom:var(--ng-space-4);">
+          Only <strong>Admins</strong> can assign or remove other Admin accounts.
+        </div>
+        <div class="ng-table-wrap">
+          <table class="ng-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Assigned</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Lin Wei</strong></td>
+                <td>linwei@ninjavan.co</td>
+                <td>01 Jan 2026</td>
+                <td><a href="#" class="ng-btn-link" style="color:var(--ng-error);">Remove</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <nav class="mockup-banner">
+    <span>Mockup:</span>
+    <a href="index.html">Hub</a>
+    <span class="active">Users & Roles</span>
+    <div class="mockup-role-switch">
+      <label for="role-select">View as</label>
+      <select id="role-select">
+        <option value="master">Master</option>
+        <option value="admin" selected>Admin</option>
+      </select>
+    </div>
+  </nav>
+
+  <script>
+    document.querySelectorAll('.ng-segment').forEach(function (seg) {
+      seg.addEventListener('click', function () {
+        document.querySelectorAll('.ng-segment').forEach(function (s) { s.classList.remove('active'); });
+        seg.classList.add('active');
+        ['teams', 'users', 'admins'].forEach(function (id) {
+          var el = document.getElementById('seg-' + id);
+          if (el) el.style.display = seg.dataset.seg === id ? 'block' : 'none';
+        });
+      });
+    });
+    document.getElementById('role-select').addEventListener('change', function () {
+      document.body.dataset.role = this.value;
+    });
+  </script>
+</body>
+</html>

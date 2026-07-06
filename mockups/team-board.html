@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NextGen — Team Board (Mockup)</title>
+  <link rel="stylesheet" href="mockups.css" />
+</head>
+<body class="ng-shell" data-role="rookie">
+  <aside class="ng-sidebar">
+    <div class="ng-sidebar-brand">
+      <img src="../design-system/reference/icon-ninja.png" alt="" />
+      <span>NextGen</span>
+    </div>
+    <nav class="ng-sidebar-nav">
+      <a class="ng-nav-item" href="dashboard.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a class="ng-nav-item active" href="team-board.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Team Board
+      </a>
+      <div class="ng-mgmt-only">
+        <div class="ng-sidebar-label">Management</div>
+        <a class="ng-nav-item" href="analytics.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          Analytics
+        </a>
+        <a class="ng-nav-item ng-admin-only" href="user-management.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Users & Roles
+        </a>
+        <a class="ng-nav-item ng-admin-only" href="settings.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Settings
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="ng-content">
+    <header class="ng-header">
+      <h1 class="ng-header-title">Team Board</h1>
+      <div class="ng-header-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="search" placeholder="Search teammates, courses…" />
+      </div>
+      <div class="ng-header-actions">
+        <button class="ng-icon-btn" type="button" aria-label="Notifications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="ng-notif-dot"></span>
+        </button>
+        <div class="ng-user-profile">
+          <span class="ng-user-name">Dini</span>
+          <span class="ng-avatar">D</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="ng-main">
+      <div class="ng-toolbar">
+        <div style="display:flex;align-items:center;gap:var(--ng-space-3);">
+          <label for="team-select" class="ng-meta-text" style="font-size:var(--ng-text-sm);color:var(--ng-text-secondary);">Team</label>
+          <select class="ng-select" id="team-select">
+            <option>Logistics Operations</option>
+            <option>Last Mile — East</option>
+          </select>
+        </div>
+      </div>
+
+      <section class="ng-team-hero">
+        <div class="ng-team-hero-inner">
+          <h2>Team Performance</h2>
+          <div class="ng-gamification-badge">
+            <div class="emoji">💪</div>
+            <h3>Keep Pushing, NextGen!</h3>
+            <p>"You're making great progress! You aren't in the top 3 yet, but the leaderboard is tight. Don't give up—keep refining your goals."</p>
+          </div>
+          <div class="ng-podium">
+            <div class="ng-podium-item">
+              <div class="ng-podium-avatar">A</div>
+              <div class="ng-podium-name">Alex Tan</div>
+              <div class="ng-podium-score">🥈 94 pts</div>
+              <div class="ng-podium-pedestal"></div>
+            </div>
+            <div class="ng-podium-item">
+              <span class="ng-podium-crown">👑</span>
+              <div class="ng-podium-avatar">M</div>
+              <div class="ng-podium-name">Maya Lim</div>
+              <div class="ng-podium-score">🥇 98 pts</div>
+              <div class="ng-podium-pedestal"></div>
+            </div>
+            <div class="ng-podium-item">
+              <div class="ng-podium-avatar">J</div>
+              <div class="ng-podium-name">Jay Wong</div>
+              <div class="ng-podium-score">🥉 91 pts</div>
+              <div class="ng-podium-pedestal"></div>
+            </div>
+          </div>
+          <div class="ng-score-bars">
+            <div class="ng-score-row"><span>Maya Lim</span><div class="ng-score-track"><div class="ng-score-fill" style="width:98%"></div></div><span>98</span></div>
+            <div class="ng-score-row"><span>Alex Tan</span><div class="ng-score-track"><div class="ng-score-fill" style="width:94%"></div></div><span>94</span></div>
+            <div class="ng-score-row"><span>Jay Wong</span><div class="ng-score-track"><div class="ng-score-fill" style="width:91%"></div></div><span>91</span></div>
+            <div class="ng-score-row ng-score-row--you"><span>You (Dini) ⭐</span><div class="ng-score-track"><div class="ng-score-fill" style="width:82%"></div></div><span>82</span></div>
+            <div class="ng-score-row"><span>Sam Koh</span><div class="ng-score-track"><div class="ng-score-fill" style="width:76%"></div></div><span>76</span></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="ng-tabs" role="tablist">
+        <button class="ng-tab active" type="button" data-tab="courses">Courses</button>
+        <button class="ng-tab" type="button" data-tab="mates">Team Mates</button>
+        <button class="ng-tab" type="button" data-tab="materials">Materials</button>
+      </div>
+
+      <!-- Courses -->
+      <div class="ng-tab-panel active" id="panel-courses">
+        <div class="ng-tab-panel-actions ng-mgmt-only">
+          <button type="button" class="ng-btn ng-btn--dark">+ Create course</button>
+        </div>
+        <div class="ng-table-wrap">
+          <table class="ng-table">
+            <thead>
+              <tr>
+                <th>Course</th>
+                <th>Status</th>
+                <th>Attempt at</th>
+                <th>Score</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Ops Basics 101</strong><br /><span class="ng-meta-text">Introductory dispatch routing</span></td>
+                <td><span class="ng-badge ng-badge--success">Completed (Pass)</span></td>
+                <td>15 Jun 2026</td>
+                <td>90%</td>
+                <td><a href="course-view.html" class="ng-btn-link">View</a></td>
+              </tr>
+              <tr>
+                <td><strong>Last Mile Safety</strong><br /><span class="ng-meta-text">Vehicle and pedestrian safety</span></td>
+                <td><span class="ng-badge ng-badge--warning">In progress</span></td>
+                <td>18 Jun 2026</td>
+                <td>—</td>
+                <td><a href="course-continue.html" class="ng-btn-link">Continue</a></td>
+              </tr>
+              <tr>
+                <td><strong>COD Handling</strong><br /><span class="ng-meta-text">Cash on delivery procedures</span></td>
+                <td><span class="ng-badge ng-badge--error">Completed (Fail)</span></td>
+                <td>10 Jun 2026</td>
+                <td>65%</td>
+                <td><a href="course-reattempt.html" class="ng-btn-link">Re-attempt</a></td>
+              </tr>
+              <tr>
+                <td><strong>Hub Sorting Guide</strong><br /><span class="ng-meta-text">Parcel sorting workflows</span></td>
+                <td><span class="ng-badge ng-badge--muted">Not started</span></td>
+                <td>—</td>
+                <td>—</td>
+                <td><a href="course-start.html" class="ng-btn-link">Start</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Team Mates -->
+      <div class="ng-tab-panel" id="panel-mates">
+        <div class="ng-tab-panel-actions ng-mgmt-only">
+          <button type="button" class="ng-btn ng-btn--outline">Update teammate</button>
+          <button type="button" class="ng-btn ng-btn--dark">+ Add teammate</button>
+        </div>
+        <div class="ng-table-wrap">
+          <table class="ng-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Maya Lim</strong></td>
+                <td>
+                  <select class="ng-table-select ng-mgmt-only" aria-label="Role for Maya Lim">
+                    <option selected>Master</option>
+                    <option>Rookie</option>
+                    <option>Admin</option>
+                  </select>
+                  <span class="ng-badge ng-badge--muted ng-rookie-only">Master</span>
+                </td>
+                <td><strong>98</strong></td>
+              </tr>
+              <tr>
+                <td><strong>Alex Tan</strong></td>
+                <td>
+                  <select class="ng-table-select ng-mgmt-only" aria-label="Role for Alex Tan">
+                    <option>Master</option>
+                    <option selected>Rookie</option>
+                    <option>Admin</option>
+                  </select>
+                  <span class="ng-badge ng-badge--muted ng-rookie-only">Rookie</span>
+                </td>
+                <td><strong>94</strong></td>
+              </tr>
+              <tr>
+                <td><strong>Dini (You)</strong></td>
+                <td>
+                  <select class="ng-table-select ng-mgmt-only" aria-label="Role for Dini">
+                    <option>Master</option>
+                    <option selected>Rookie</option>
+                    <option>Admin</option>
+                  </select>
+                  <span class="ng-badge ng-badge--muted ng-rookie-only">Rookie</span>
+                </td>
+                <td><strong>82</strong></td>
+              </tr>
+              <tr>
+                <td><strong>Jay Wong</strong></td>
+                <td>
+                  <select class="ng-table-select ng-mgmt-only" aria-label="Role for Jay Wong">
+                    <option>Master</option>
+                    <option selected>Rookie</option>
+                    <option>Admin</option>
+                  </select>
+                  <span class="ng-badge ng-badge--muted ng-rookie-only">Rookie</span>
+                </td>
+                <td><strong>91</strong></td>
+              </tr>
+              <tr>
+                <td><strong>Sam Koh</strong></td>
+                <td>
+                  <select class="ng-table-select ng-mgmt-only" aria-label="Role for Sam Koh">
+                    <option>Master</option>
+                    <option selected>Rookie</option>
+                    <option>Admin</option>
+                  </select>
+                  <span class="ng-badge ng-badge--muted ng-rookie-only">Rookie</span>
+                </td>
+                <td><strong>76</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Materials -->
+      <div class="ng-tab-panel" id="panel-materials">
+        <div class="ng-table-wrap">
+          <table class="ng-table">
+            <thead>
+              <tr>
+                <th>Material</th>
+                <th>Group</th>
+                <th>Type</th>
+                <th>Updated</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Delivery Operations Guide</strong></td>
+                <td>Operations</td>
+                <td><span class="ng-badge ng-badge--muted">File</span></td>
+                <td>15 Jun 2026</td>
+                <td><a href="material-view-file.html" class="ng-btn-link">View</a></td>
+              </tr>
+              <tr>
+                <td><strong>Last Mile Safety Handbook</strong></td>
+                <td>Safety</td>
+                <td><span class="ng-badge ng-badge--muted">Link</span></td>
+                <td>12 Jun 2026</td>
+                <td><a href="material-view-link.html" class="ng-btn-link">View</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <nav class="mockup-banner">
+    <span>Mockup:</span>
+    <a href="index.html">Hub</a>
+    <a href="login.html">Login</a>
+    <a href="dashboard.html">Dashboard</a>
+    <span class="active">Team Board</span>
+    <div class="mockup-role-switch">
+      <label for="role-select">View as</label>
+      <select id="role-select">
+        <option value="rookie" selected>Rookie</option>
+        <option value="master">Master</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+  </nav>
+
+  <script>
+    (function () {
+      const tabs = document.querySelectorAll('.ng-tab');
+      const panels = document.querySelectorAll('.ng-tab-panel');
+      const roleSelect = document.getElementById('role-select');
+
+      const hashToTab = { courses: 'courses', mates: 'mates', materials: 'materials', management: 'courses' };
+
+      function switchTab(tabId) {
+        tabs.forEach((t) => t.classList.toggle('active', t.dataset.tab === tabId));
+        panels.forEach((p) => p.classList.toggle('active', p.id === 'panel-' + tabId));
+        if (history.replaceState) {
+          history.replaceState(null, '', '#' + tabId);
+        }
+      }
+
+      tabs.forEach((tab) => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+
+      const hash = location.hash.replace('#', '');
+      switchTab(hashToTab[hash] || 'courses');
+
+      roleSelect.addEventListener('change', () => {
+        document.body.dataset.role = roleSelect.value;
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NextGen — Continue Course (Mockup)</title>
+  <link rel="stylesheet" href="mockups.css" />
+</head>
+<body class="ng-shell" data-role="rookie">
+  <aside class="ng-sidebar">
+    <div class="ng-sidebar-brand">
+      <img src="../design-system/reference/icon-ninja.png" alt="" />
+      <span>NextGen</span>
+    </div>
+    <nav class="ng-sidebar-nav">
+      <a class="ng-nav-item" href="dashboard.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a class="ng-nav-item active" href="team-board.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Team Board
+      </a>
+      <div class="ng-mgmt-only">
+        <div class="ng-sidebar-label">Management</div>
+        <a class="ng-nav-item" href="analytics.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Analytics</a>
+        <a class="ng-nav-item ng-admin-only" href="user-management.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Users & Roles</a>
+        <a class="ng-nav-item ng-admin-only" href="settings.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Settings</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="ng-content">
+    <header class="ng-header">
+      <h1 class="ng-header-title">Last Mile Safety</h1>
+      <div class="ng-header-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="search" placeholder="Search…" />
+      </div>
+      <div class="ng-header-actions">
+        <div class="ng-user-profile"><span class="ng-user-name">Dini</span><span class="ng-avatar">D</span></div>
+      </div>
+    </header>
+
+    <main class="ng-main">
+      <nav class="ng-breadcrumb">
+        <a href="team-board.html">Team Board</a> › <span>Last Mile Safety</span>
+      </nav>
+
+      <div class="ng-quiz-card">
+        <div class="ng-quiz-progress">
+          <span>Question 3 of 10</span>
+          <div class="ng-quiz-progress-bar"><div class="ng-quiz-progress-fill" style="width:30%"></div></div>
+          <span class="ng-quiz-timer">⏱ 12:34</span>
+        </div>
+
+        <p class="ng-quiz-question">When approaching a pedestrian crossing, what should a driver do first?</p>
+
+        <div class="ng-quiz-options">
+          <label class="ng-quiz-option">
+            <input type="radio" name="q3" />
+            <span>Honk to alert pedestrians</span>
+          </label>
+          <label class="ng-quiz-option selected">
+            <input type="radio" name="q3" checked />
+            <span>Reduce speed and scan both directions</span>
+          </label>
+          <label class="ng-quiz-option">
+            <input type="radio" name="q3" />
+            <span>Maintain current speed</span>
+          </label>
+          <label class="ng-quiz-option">
+            <input type="radio" name="q3" />
+            <span>Stop only if someone waves</span>
+          </label>
+        </div>
+
+        <div class="ng-quiz-footer">
+          <button type="button" class="ng-btn ng-btn--outline" onclick="document.getElementById('close-dialog').style.display='grid'">Close Course</button>
+          <div style="display:flex;gap:var(--ng-space-3);">
+            <button type="button" class="ng-btn ng-btn--outline">Previous</button>
+            <button type="button" class="ng-btn ng-btn--brand">Next</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Close course confirmation dialog -->
+  <div class="ng-dialog-backdrop" id="close-dialog" style="display:none;">
+    <div class="ng-dialog" role="dialog" aria-labelledby="close-title">
+      <div class="ng-dialog-header">
+        <h3 id="close-title">Close course?</h3>
+        <button class="ng-dialog-close" type="button" onclick="document.getElementById('close-dialog').style.display='none'">×</button>
+      </div>
+      <div class="ng-dialog-body">
+        <p>Your answers and elapsed time will be saved. Status will remain <strong>In progress</strong> and you can continue later.</p>
+      </div>
+      <div class="ng-dialog-footer">
+        <button type="button" class="ng-btn ng-btn--outline" onclick="document.getElementById('close-dialog').style.display='none'">Cancel</button>
+        <a href="team-board.html" class="ng-btn ng-btn--brand">Confirm &amp; return</a>
+      </div>
+    </div>
+  </div>
+
+  <nav class="mockup-banner">
+    <span>Mockup:</span>
+    <a href="index.html">Hub</a>
+    <a href="team-board.html">Team Board</a>
+    <span class="active">Course → Continue</span>
+  </nav>
+</body>
+</html>

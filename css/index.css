@@ -1,0 +1,170 @@
+/**
+ * NextGen App Styles
+ * Built on design tokens + mockup component library.
+ */
+@import url('../design-system/tokens.css');
+@import url('../mockups/mockups.css');
+
+/* ── App overrides ────────────────────────────────────── */
+body { background: var(--ng-page-bg); color: var(--ng-text-primary); }
+
+.view { min-height: 100vh; }
+.view.hidden { display: none !important; }
+.page.hidden { display: none !important; }
+
+.hidden { display: none !important; }
+.muted { color: var(--ng-text-muted); font-size: var(--ng-text-sm); }
+.error-text { color: var(--ng-error); font-size: var(--ng-text-sm); margin-top: var(--ng-space-2); }
+
+/* Legacy aliases used by JS-rendered content */
+.data-table { width: 100%; border-collapse: collapse; font-size: var(--ng-text-sm); }
+.data-table th, .data-table td {
+  padding: var(--ng-space-4) var(--ng-space-5);
+  text-align: left;
+  border-bottom: 1px solid var(--ng-border);
+}
+.data-table th {
+  background: var(--ng-page-bg);
+  font-weight: var(--ng-weight-semibold);
+  color: var(--ng-text-secondary);
+  font-size: var(--ng-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.data-table tr:last-child td { border-bottom: none; }
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: var(--ng-radius-pill);
+  font-size: var(--ng-text-xs);
+  font-weight: var(--ng-weight-semibold);
+}
+.badge-open, .badge-pass { background: var(--ng-success-bg); color: var(--ng-success); }
+.badge-draft, .badge-progress { background: var(--ng-warning-bg); color: var(--ng-warning); }
+.badge-closed, .badge-fail { background: var(--ng-error-bg); color: var(--ng-error); }
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ng-space-2);
+  padding: var(--ng-space-2) var(--ng-space-5);
+  font: inherit;
+  font-size: var(--ng-text-sm);
+  font-weight: var(--ng-weight-semibold);
+  border-radius: var(--ng-radius-pill);
+  border: none;
+  cursor: pointer;
+  background: var(--ng-brand-red);
+  color: var(--ng-text-inverse);
+}
+.btn-danger { background: var(--ng-error); color: white; padding: var(--ng-space-2) var(--ng-space-5); border-radius: var(--ng-radius-pill); border: none; font: inherit; font-weight: var(--ng-weight-semibold); cursor: pointer; }
+.btn-ghost { background: var(--ng-surface); border: 1px solid var(--ng-border-strong); color: var(--ng-text-primary); padding: var(--ng-space-2) var(--ng-space-5); border-radius: var(--ng-radius-pill); font: inherit; cursor: pointer; }
+.btn-secondary { background: var(--ng-charcoal); color: white; padding: var(--ng-space-2) var(--ng-space-5); border-radius: var(--ng-radius-pill); border: none; font: inherit; cursor: pointer; }
+.btn-sm { font-size: var(--ng-text-sm); padding: 6px 14px; }
+
+.select { min-width: 200px; padding: var(--ng-space-2) var(--ng-space-8) var(--ng-space-2) var(--ng-space-4); border: 1px solid var(--ng-border); border-radius: var(--ng-radius-pill); background: var(--ng-surface); font: inherit; font-size: var(--ng-text-sm); }
+
+/* Native dialog — viewport-centered, scrollable body */
+dialog {
+  border: none;
+  border-radius: 24px;
+  padding: 0;
+  background: var(--ng-surface);
+  color: var(--ng-text-primary);
+  max-width: 560px;
+  width: calc(100% - 2rem);
+  max-height: calc(100vh - 2rem);
+  box-shadow: var(--ng-shadow-modal);
+  overflow: hidden;
+  margin: auto;
+  position: fixed;
+  inset: 0;
+  height: fit-content;
+}
+dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+dialog::backdrop { background: rgba(0, 0, 0, 0.45); }
+dialog.dialog-wide { max-width: 720px; }
+
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 2rem);
+  overflow: hidden;
+  margin: 0;
+}
+.dialog-body {
+  overflow-y: auto;
+  padding: var(--ng-space-6);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+dialog h3 { font-size: var(--ng-text-lg); font-weight: var(--ng-weight-semibold); margin-bottom: var(--ng-space-4); }
+dialog label { display: flex; flex-direction: column; gap: var(--ng-space-1); margin-bottom: var(--ng-space-4); font-size: var(--ng-text-sm); color: var(--ng-text-muted); }
+dialog label span { color: var(--ng-text-muted); }
+dialog input, dialog select, dialog textarea {
+  font: inherit;
+  padding: var(--ng-space-3) var(--ng-space-4);
+  background: var(--ng-page-bg);
+  border: 1px solid var(--ng-border);
+  border-radius: 12px;
+  color: var(--ng-text-primary);
+}
+dialog input:focus, dialog select:focus, dialog textarea:focus {
+  outline: none;
+  border-color: var(--ng-brand-red);
+  box-shadow: 0 0 0 3px var(--ng-brand-red-muted);
+}
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ng-space-3);
+  flex-shrink: 0;
+  padding: var(--ng-space-4) var(--ng-space-6) var(--ng-space-6);
+  border-top: 1px solid var(--ng-border);
+  background: var(--ng-surface);
+}
+.dialog-actions-center { justify-content: center; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--ng-space-4); }
+.form-grid .span-2 { grid-column: span 2; }
+.material-picker-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--ng-space-4); }
+.material-picker-col select { min-height: 140px; }
+.material-source-fieldset { border: 1px solid var(--ng-border); border-radius: 12px; padding: var(--ng-space-3) var(--ng-space-4); margin: var(--ng-space-3) 0; }
+.material-source-fieldset legend { padding: 0 var(--ng-space-2); font-size: var(--ng-text-sm); color: var(--ng-text-secondary); }
+.inline-radio { display: inline-flex; align-items: center; gap: var(--ng-space-2); margin-right: var(--ng-space-5); font-size: var(--ng-text-sm); cursor: pointer; }
+.selected-materials-list { list-style: none; min-height: 120px; padding: var(--ng-space-3); border: 1px solid var(--ng-border); border-radius: 12px; background: var(--ng-page-bg); }
+.selected-material-chip { display: flex; justify-content: space-between; padding: var(--ng-space-2) var(--ng-space-3); margin-bottom: var(--ng-space-2); border-radius: var(--ng-radius-pill); background: var(--ng-surface); border: 1px solid var(--ng-border); font-size: var(--ng-text-sm); }
+.selected-material-chip button { border: none; background: none; color: var(--ng-brand-red); cursor: pointer; }
+.format-checkboxes { display: flex; flex-wrap: wrap; gap: var(--ng-space-3); }
+.checkbox-label { flex-direction: row !important; align-items: center; gap: var(--ng-space-2); padding: var(--ng-space-2) var(--ng-space-4); border: 1px solid var(--ng-border); border-radius: var(--ng-radius-pill); margin-bottom: 0 !important; cursor: pointer; }
+.field-label { display: block; font-size: var(--ng-text-sm); font-weight: var(--ng-weight-medium); margin-bottom: var(--ng-space-2); color: var(--ng-text-secondary); }
+
+#attempt-history-content { max-height: 50vh; overflow-y: auto; }
+#course-review { border-top: 1px solid var(--ng-border); max-height: 240px; overflow-y: auto; }
+.question-review { padding: var(--ng-space-3); margin-bottom: var(--ng-space-3); border-radius: 12px; background: var(--ng-page-bg); font-size: var(--ng-text-sm); }
+.question-review .correct-answer { color: var(--ng-success); font-weight: var(--ng-weight-semibold); }
+
+/* Charts */
+.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--ng-space-4); margin-bottom: var(--ng-space-6); }
+.chart-panel { background: var(--ng-surface); border: 1px solid var(--ng-border); border-radius: 20px; padding: var(--ng-space-5); min-height: 260px; }
+.chart-panel h3 { font-size: var(--ng-text-base); font-weight: var(--ng-weight-semibold); margin-bottom: var(--ng-space-4); color: var(--ng-text-secondary); }
+.chart-panel canvas { width: 100% !important; max-height: 200px; }
+.chart-wide { grid-column: span 2; }
+
+.ng-course-mgmt-actions { display: flex; flex-wrap: wrap; gap: var(--ng-space-2); margin-top: var(--ng-space-2); padding-top: var(--ng-space-2); border-top: 1px dashed var(--ng-border); }
+
+.invite-user-results { display: flex; flex-direction: column; gap: var(--ng-space-2); max-height: 180px; overflow-y: auto; margin-bottom: var(--ng-space-4); }
+.invite-user-option { display: block; width: 100%; text-align: left; padding: var(--ng-space-3); border: 1px solid var(--ng-border); border-radius: 12px; background: var(--ng-page-bg); cursor: pointer; font: inherit; color: inherit; }
+.invite-user-option:hover { border-color: var(--ng-brand-green); background: var(--ng-surface); }
+#google-signin-btn { display: flex; justify-content: center; min-height: 44px; }
+
+@media (max-width: 900px) {
+  .form-grid, .material-picker-row { grid-template-columns: 1fr; }
+  .form-grid .span-2 { grid-column: span 1; }
+  .charts-row { grid-template-columns: 1fr; }
+  .chart-wide { grid-column: span 1; }
+}

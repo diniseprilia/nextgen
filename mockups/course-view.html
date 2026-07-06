@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NextGen — Course View (Mockup)</title>
+  <link rel="stylesheet" href="mockups.css" />
+</head>
+<body class="ng-shell" data-role="rookie">
+  <aside class="ng-sidebar">
+    <div class="ng-sidebar-brand">
+      <img src="../design-system/reference/icon-ninja.png" alt="" />
+      <span>NextGen</span>
+    </div>
+    <nav class="ng-sidebar-nav">
+      <a class="ng-nav-item" href="dashboard.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a class="ng-nav-item active" href="team-board.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Team Board
+      </a>
+      <div class="ng-mgmt-only">
+        <div class="ng-sidebar-label">Management</div>
+        <a class="ng-nav-item" href="analytics.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Analytics</a>
+        <a class="ng-nav-item ng-admin-only" href="user-management.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Users & Roles</a>
+        <a class="ng-nav-item ng-admin-only" href="settings.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Settings</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="ng-content">
+    <header class="ng-header">
+      <h1 class="ng-header-title">Course Result</h1>
+      <div class="ng-header-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="search" placeholder="Search…" />
+      </div>
+      <div class="ng-header-actions">
+        <div class="ng-user-profile"><span class="ng-user-name">Dini</span><span class="ng-avatar">D</span></div>
+      </div>
+    </header>
+
+    <main class="ng-main">
+      <nav class="ng-breadcrumb">
+        <a href="team-board.html">Team Board</a> › <span>Ops Basics 101</span>
+      </nav>
+
+      <div class="ng-course-header">
+        <div class="ng-course-header-top">
+          <div>
+            <h2>Ops Basics 101</h2>
+            <p class="ng-meta-text" style="margin-top:8px;">Introductory dispatch routing</p>
+          </div>
+          <span class="ng-badge ng-badge--success">Completed (Pass)</span>
+        </div>
+        <div class="ng-course-meta">
+          <span>Attempted: 15 Jun 2026</span>
+          <span>Duration: 28 min</span>
+          <span>Min score: 80%</span>
+        </div>
+      </div>
+
+      <div class="ng-result-grid">
+        <div class="ng-result-stat">
+          <div class="value">90%</div>
+          <div class="label">Your score</div>
+        </div>
+        <div class="ng-result-stat">
+          <div class="value">9/10</div>
+          <div class="label">Correct answers</div>
+        </div>
+        <div class="ng-result-stat">
+          <div class="value">1</div>
+          <div class="label">Total attempts</div>
+        </div>
+      </div>
+
+      <div class="ng-panel">
+        <div class="ng-panel-header"><h3>Answer summary</h3></div>
+        <ul class="ng-answer-list">
+          <li class="ng-answer-item correct">✓ Q1. What is the primary dispatch cutoff time? — <strong>2 PM</strong></li>
+          <li class="ng-answer-item correct">✓ Q2. Who approves route changes? — <strong>Hub Master</strong></li>
+          <li class="ng-answer-item incorrect">✗ Q3. Maximum parcels per run? — You: <strong>50</strong> · Correct: <strong>40</strong></li>
+          <li class="ng-answer-item correct">✓ Q4. COD handling first step? — <strong>Verify amount</strong></li>
+        </ul>
+      </div>
+
+      <div style="margin-top:var(--ng-space-5);">
+        <a href="team-board.html" class="ng-btn ng-btn--outline">← Back to Team Board</a>
+      </div>
+    </main>
+  </div>
+
+  <nav class="mockup-banner">
+    <span>Mockup:</span>
+    <a href="index.html">Hub</a>
+    <a href="team-board.html">Team Board</a>
+    <span class="active">Course → View</span>
+  </nav>
+</body>
+</html>

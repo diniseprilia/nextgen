@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NextGen — Re-attempt Course (Mockup)</title>
+  <link rel="stylesheet" href="mockups.css" />
+</head>
+<body class="ng-shell" data-role="rookie">
+  <aside class="ng-sidebar">
+    <div class="ng-sidebar-brand">
+      <img src="../design-system/reference/icon-ninja.png" alt="" />
+      <span>NextGen</span>
+    </div>
+    <nav class="ng-sidebar-nav">
+      <a class="ng-nav-item" href="dashboard.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a class="ng-nav-item active" href="team-board.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Team Board
+      </a>
+      <div class="ng-mgmt-only">
+        <div class="ng-sidebar-label">Management</div>
+        <a class="ng-nav-item" href="analytics.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Analytics</a>
+        <a class="ng-nav-item ng-admin-only" href="user-management.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Users & Roles</a>
+        <a class="ng-nav-item ng-admin-only" href="settings.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Settings</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="ng-content">
+    <header class="ng-header">
+      <h1 class="ng-header-title">Re-attempt Course</h1>
+      <div class="ng-header-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="search" placeholder="Search…" />
+      </div>
+      <div class="ng-header-actions">
+        <div class="ng-user-profile"><span class="ng-user-name">Dini</span><span class="ng-avatar">D</span></div>
+      </div>
+    </header>
+
+    <main class="ng-main">
+      <nav class="ng-breadcrumb">
+        <a href="team-board.html">Team Board</a> › <span>COD Handling</span>
+      </nav>
+
+      <div class="ng-course-header">
+        <div class="ng-course-header-top">
+          <div>
+            <h2>COD Handling</h2>
+            <p class="ng-meta-text" style="margin-top:8px;">Cash on delivery procedures</p>
+          </div>
+          <span class="ng-badge ng-badge--error">Completed (Fail) — 65%</span>
+        </div>
+        <div class="ng-course-meta">
+          <span>Previous attempt: 10 Jun 2026</span>
+          <span>Min score required: 80%</span>
+          <span>Attempts: 1</span>
+        </div>
+      </div>
+
+      <div class="ng-alert ng-alert--warning">
+        <strong>Re-attempt rules:</strong> You will receive the <em>same questions</em> from your previous attempt unless the course has been updated by a Master/Admin. Your attempt history will be preserved; only your latest score counts on the leaderboard.
+      </div>
+
+      <div class="ng-intro-card">
+        <h3>Ready to try again?</h3>
+        <p class="ng-meta-text" style="margin-bottom:var(--ng-space-4);">Review the materials before re-attempting to improve your score.</p>
+        <ul class="ng-intro-list">
+          <li>📄 10 questions · Multiple choice</li>
+          <li>⏱ Estimated time: 25 minutes</li>
+          <li>🎯 Pass mark: 80%</li>
+          <li>📚 Material: COD Operations Guide</li>
+        </ul>
+        <div style="display:flex;gap:var(--ng-space-3);margin-top:var(--ng-space-5);">
+          <a href="course-continue.html" class="ng-btn ng-btn--brand">Start Re-attempt</a>
+          <a href="team-board.html" class="ng-btn ng-btn--outline">Cancel</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <nav class="mockup-banner">
+    <span>Mockup:</span>
+    <a href="index.html">Hub</a>
+    <a href="team-board.html">Team Board</a>
+    <span class="active">Course → Re-attempt</span>
+  </nav>
+</body>
+</html>

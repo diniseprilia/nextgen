@@ -1,0 +1,16 @@
+---
+description: Read nextgen_spec.md before implementing or updating NextGen features
+alwaysApply: true
+---
+
+# Read the spec first
+
+Before implementing features, fixing bugs, or updating documentation for NextGen:
+
+1. **Read [`nextgen_spec.md`](nextgen_spec.md)** at the project root — it is the source of truth for product behavior, roles, UI flows, data models, and REST APIs.
+2. **Follow the spec** for naming, schemas, permissions, and user flows. Do not invent behavior that contradicts it.
+3. **Check related docs** when touching the backend: [`server/README.md`](server/README.md) for API details and environment setup.
+4. **Update the spec** when you change intentional product behavior (new endpoints, schema changes, role rules). Keep spec and code in sync.
+5. **Do not update the spec** for pure refactors or internal fixes that do not change documented behavior.
+
+When the spec and code disagree, treat the spec as the target unless the user explicitly asks to change requirements.
