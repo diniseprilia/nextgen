@@ -18,7 +18,4 @@ services:
       - MINIO_USE_SSL=false
     env_file:
       - .env
-    depends_on:
-      - mongodb
-      - minio
     restart: unless-stopped
