@@ -1,0 +1,24 @@
+# Run with: docker compose -f docker-compose.yml -f docker-compose.app.yml up -d --build
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: nextgen-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      # Use container hostnames inside the docker network
+      - MONGODB_URI=mongodb://mongodb:27017/nextgen
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_USE_SSL=false
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+      - minio
+    restart: unless-stopped
