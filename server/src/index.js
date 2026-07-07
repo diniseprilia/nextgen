@@ -22,6 +22,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '../..');
 
 const app = express();
+app.set('trust proxy', true);
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(cookieParser());

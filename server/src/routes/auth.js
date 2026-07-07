@@ -18,11 +18,13 @@ const OAUTH_STATE_COOKIE = 'auth0_oauth_state';
 
 function setSessionCookie(res, userId) {
   const token = createSessionToken(userId);
+  const req = res.req;
+  const isSecure = req.secure || req.get('x-forwarded-proto') === 'https';
   res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: 'lax',
     maxAge: SESSION_MAX_AGE_MS,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isSecure,
   });
 }
 
@@ -53,11 +55,12 @@ router.get('/login', (req, res) => {
 
   const state = createOAuthState();
   const redirectUri = getAuth0CallbackUrl(req);
+  const isSecure = req.secure || req.get('x-forwarded-proto') === 'https';
   res.cookie(OAUTH_STATE_COOKIE, state, {
     httpOnly: true,
     sameSite: 'lax',
     maxAge: 10 * 60 * 1000,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isSecure,
   });
   res.redirect(buildAuthorizeUrl({ state, redirectUri }));
 });

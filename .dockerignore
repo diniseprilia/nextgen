@@ -5,7 +5,8 @@ server/node_modules/
 .env
 .env.example
 docs/
-mockups/
+mockups/*
+!mockups/mockups.css
 *.md
 .cursor/
 .DS_Store

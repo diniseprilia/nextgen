@@ -14,6 +14,7 @@ RUN cd server && npm ci --only=production
 COPY css ./css
 COPY design-system ./design-system
 COPY js ./js
+COPY mockups/mockups.css ./mockups/mockups.css
 COPY index.html ./
 COPY server/src ./server/src
 
