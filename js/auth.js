@@ -7,8 +7,9 @@ import {
 const SESSION_HOURS = 24;
 
 let currentUserCache = null;
-let googleClientId = null;
+let authConfig = null;
 let authApiAvailable = false;
+let lastAuthError = null;
 
 async function authFetch(path, options = {}) {
   const res = await fetch(`/api/auth${path}`, {
@@ -23,26 +24,44 @@ async function authFetch(path, options = {}) {
   return res.json();
 }
 
+function readAuthErrorFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const error = params.get('auth_error');
+  if (!error) return null;
+  window.history.replaceState({}, document.title, window.location.pathname);
+  return error;
+}
+
+async function loadAuthConfig() {
+  const health = await fetch('/api/health');
+  if (!health.ok) throw new Error('API unavailable');
+  authApiAvailable = true;
+  authConfig = await authFetch('/config');
+  if (!authConfig?.auth0Domain || !authConfig?.auth0ClientId) {
+    throw new Error('Auth0 is not configured on the server. Set AUTH0_DOMAIN, AUTH0_CLIENT_ID, and AUTH0_CLIENT_SECRET in .env and restart the server.');
+  }
+  return authConfig;
+}
+
 export async function initAuth() {
+  lastAuthError = readAuthErrorFromUrl();
   try {
-    const health = await fetch('/api/health');
-    if (!health.ok) throw new Error('API unavailable');
-    authApiAvailable = true;
-    const config = await authFetch('/config');
-    googleClientId = config.googleClientId || null;
+    await loadAuthConfig();
     try {
       currentUserCache = await authFetch('/me');
       syncLocalSession(currentUserCache);
+      lastAuthError = null;
     } catch {
       currentUserCache = null;
       clearSession();
     }
-  } catch {
+  } catch (err) {
     authApiAvailable = false;
-    googleClientId = null;
+    authConfig = null;
+    lastAuthError = lastAuthError || err.message;
     currentUserCache = getLocalSessionUser();
   }
-  return { authApiAvailable, googleClientId, user: currentUserCache };
+  return { authApiAvailable, authConfig, user: currentUserCache, error: lastAuthError };
 }
 
 function getLocalSessionUser() {
@@ -65,30 +84,23 @@ function syncLocalSession(user) {
   });
 }
 
-export function getGoogleClientId() {
-  return googleClientId;
-}
-
 export function isAuthApiAvailable() {
   return authApiAvailable;
 }
 
-export async function loginWithGoogle(credential) {
+export function getAuthConfig() {
+  return authConfig;
+}
+
+export async function loginWithAuth0() {
   if (!authApiAvailable) {
     return { ok: false, error: 'Server is unavailable. Start the NextGen server to sign in.' };
   }
-  try {
-    const user = await authFetch('/google', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ credential }),
-    });
-    currentUserCache = user;
-    syncLocalSession(user);
-    return { ok: true, user };
-  } catch (err) {
-    return { ok: false, error: err.message };
+  if (!authConfig?.auth0Domain || !authConfig?.auth0ClientId) {
+    return { ok: false, error: 'Auth0 is not configured. Set AUTH0_DOMAIN, AUTH0_CLIENT_ID, and AUTH0_CLIENT_SECRET in .env and restart the server.' };
   }
+  window.location.href = '/api/auth/login';
+  return { ok: true, redirecting: true };
 }
 
 export async function refreshCurrentUser() {
@@ -113,6 +125,8 @@ export async function logout() {
     } catch {
       /* ignore */
     }
+    window.location.href = '/api/auth/logout';
+    return;
   }
   currentUserCache = null;
   clearSession();
@@ -156,54 +170,36 @@ export function formatLastLogin(iso) {
   return `Last login: ${new Date(iso).toLocaleString()}`;
 }
 
-export function renderGoogleSignInButton(container, onSuccess, onError) {
-  if (!googleClientId) {
-    container.innerHTML = '<p class="error-text">Google Sign-In is not configured. Set GOOGLE_CLIENT_ID in .env and restart the server.</p>';
+export function getLastAuthError() {
+  return lastAuthError;
+}
+
+export function renderAuth0SignInButton(container, onSuccess, onError) {
+  if (!authApiAvailable) {
+    container.innerHTML = '<p class="error-text">Server is unavailable. Start the NextGen server at <strong>http://localhost:3000</strong> and refresh this page.</p>';
     return;
   }
-  if (!window.google?.accounts?.id) {
-    container.innerHTML = '<p class="muted">Loading Google Sign-In…</p>';
+  if (!authConfig?.ready) {
+    container.innerHTML = '<p class="error-text">Auth0 is not fully configured. Add AUTH0_CLIENT_SECRET to .env (Regular Web Application in Auth0), set callback URL to <code>/api/auth/oauth/callback</code>, and restart the server.</p>';
     return;
   }
 
   container.innerHTML = '';
-  window.google.accounts.id.initialize({
-    client_id: googleClientId,
-    callback: async (response) => {
-      const result = await loginWithGoogle(response.credential);
-      if (result.ok) onSuccess(result.user);
-      else onError(result.error);
-    },
-    auto_select: false,
+  if (lastAuthError) {
+    onError(lastAuthError);
+  }
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'ng-btn ng-btn--brand ng-btn--pill';
+  button.style.width = '100%';
+  button.textContent = 'Sign in with Google';
+  button.addEventListener('click', async () => {
+    button.disabled = true;
+    const result = await loginWithAuth0();
+    if (result.ok && result.redirecting) return;
+    button.disabled = false;
+    if (result.ok) onSuccess(getCurrentUser());
+    else onError(result.error);
   });
-  window.google.accounts.id.renderButton(container, {
-    type: 'standard',
-    theme: 'outline',
-    size: 'large',
-    text: 'signin_with',
-    shape: 'pill',
-    width: 320,
-  });
-}
-
-export function loadGoogleIdentityScript() {
-  return new Promise((resolve, reject) => {
-    if (window.google?.accounts?.id) {
-      resolve();
-      return;
-    }
-    const existing = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
-    if (existing) {
-      existing.addEventListener('load', () => resolve());
-      existing.addEventListener('error', reject);
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
+  container.appendChild(button);
 }

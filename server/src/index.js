@@ -33,6 +33,10 @@ app.use('/api/materials', materialsRouter);
 app.use('/api/courses', coursesRouter);
 app.use('/api/attempts', attemptsRouter);
 app.use('/api/questions', questionsRouter);
+app.use(
+  '/vendor/auth0',
+  express.static(path.join(__dirname, '../node_modules/@auth0/auth0-spa-js/dist')),
+);
 app.use(express.static(rootDir, {
   setHeaders(res, filePath) {
     if (/\.(html|js|css)$/i.test(filePath)) {

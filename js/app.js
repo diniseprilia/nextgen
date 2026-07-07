@@ -3,7 +3,7 @@ import { getCourses, getCoursesForUser, getCoursesForAnalytics, loadCourses, cre
 import { getAttempts, getLatestAttempt, getCourseProgressStatus, getAllAttemptsForUserCourse, getUserAverageScore, getUserAverageScoreForTeam, loadAttempts, createAttempt, updateAttempt, refreshAttempts, refreshAttemptsForCourse } from './attempts-api.js';
 import { getUsers, getTeams, getUserById, loadUsersAndTeams, getAccessibleTeams, getInvitableTeams, userHasTeams, inviteUserToTeam, removeTeamMember, updateUserRole, promoteToAdmin, demoteAdmin, createTeam, deleteTeam, searchUsers, getGlobalLeaderboard, getTeamLeaderboard, isTop3Global, isTop3Team } from './users-api.js';
 import { refreshMaterials, loadMaterials, getMaterialsList, createMaterial, updateMaterial, deleteMaterial, getDownloadUrl, getPreviewUrl, getContentUrl, fetchMaterialTextsForGeneration, isUrlMaterial, isFileMaterial, formatBytes, isApiAvailable, ALLOWED_MATERIAL_EXTENSIONS, UNSUPPORTED_FILE_ERROR } from './materials-api.js';
-import { logout, getCurrentUser, checkSession, refreshCurrentUser, setCurrentUser, isMasterOrAdmin, isAdmin, canManageAdmins, canInviteUsers, formatLastLogin, initAuth, renderGoogleSignInButton, loadGoogleIdentityScript } from './auth.js';
+import { logout, getCurrentUser, checkSession, refreshCurrentUser, setCurrentUser, isMasterOrAdmin, isAdmin, canManageAdmins, canInviteUsers, formatLastLogin, initAuth, renderAuth0SignInButton, getAuthConfig } from './auth.js';
 import { generateQuestions, scoreAttempt, formatDuration, normalizeFormats, isShortAnswerQuestion, isAnswerCorrect } from './quiz.js';
 import { drawBarChart, drawProgressRings, drawLineChart } from './charts.js';
 import { parsePath, syncUrl, getPathForNav, resolveTeamId } from './router.js';
@@ -258,22 +258,19 @@ async function showLogin() {
   const originHint = $('#login-origin-hint');
   if (originHint) {
     const origin = window.location.origin;
-    originHint.innerHTML = `Developer: add this exact origin in Google Cloud → Credentials → OAuth client → <strong>Authorized JavaScript origins</strong>:<br><code>${origin}</code>`;
+    const authConfig = getAuthConfig();
+    const callback = authConfig?.callbackUrl || `${origin}/api/auth/oauth/callback`;
+    originHint.innerHTML = `Developer: add this URL in Auth0 → Application → Settings → <strong>Allowed Callback URLs</strong>:<br><code>${callback}</code><br>And <strong>Allowed Logout URLs</strong>: <code>${origin}</code>`;
     originHint.classList.remove('hidden');
   }
-  try {
-    await loadGoogleIdentityScript();
-    renderGoogleSignInButton(
-      $('#google-signin-btn'),
-      () => enterApp(),
-      (err) => {
-        $('#login-error').textContent = err;
-        $('#login-error').classList.remove('hidden');
-      },
-    );
-  } catch {
-    $('#google-signin-btn').innerHTML = '<p class="error-text">Failed to load Google Sign-In.</p>';
-  }
+  renderAuth0SignInButton(
+    $('#auth0-signin-btn'),
+    () => enterApp(),
+    (err) => {
+      $('#login-error').textContent = err;
+      $('#login-error').classList.remove('hidden');
+    },
+  );
 }
 
 async function renderDashboard(skipDataRefresh = false) {
@@ -1529,6 +1526,7 @@ function bindEvents() {
   $('#btn-logout').onclick = async () => {
     await logout();
     window.history.replaceState({}, '', '/');
+    await initAuth();
     showLogin();
   };
 
@@ -1704,9 +1702,15 @@ function bindEvents() {
 async function init() {
   ensureSeed();
   bindEvents();
-  await initAuth();
+  const auth = await initAuth();
   if (checkSession()) enterApp();
-  else showLogin();
+  else {
+    showLogin();
+    if (auth.error && $('#login-error')) {
+      $('#login-error').textContent = auth.error;
+      $('#login-error').classList.remove('hidden');
+    }
+  }
 }
 
 init();

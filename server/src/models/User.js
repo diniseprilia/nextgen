@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: ['Rookie', 'Master', 'Admin'], default: 'Rookie' },
     teamIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Team' }],
     googleSub: { type: String, default: null, sparse: true },
+    auth0Sub: { type: String, default: null, sparse: true },
     lastLogin: { type: Date, default: null },
   },
   { timestamps: true },

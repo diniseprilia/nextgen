@@ -8,7 +8,11 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 export const config = {
   port: Number(process.env.PORT) || 3000,
   mongoUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/nextgen',
-  googleClientId: process.env.GOOGLE_CLIENT_ID || '',
+  auth0Domain: (process.env.AUTH0_DOMAIN || '').trim(),
+  auth0ClientId: (process.env.AUTH0_CLIENT_ID || '').trim(),
+  auth0ClientSecret: (process.env.AUTH0_CLIENT_SECRET || '').trim(),
+  auth0CallbackUrl: (process.env.AUTH0_CALLBACK_URL || '').trim(),
+  auth0GoogleConnection: (process.env.AUTH0_GOOGLE_CONNECTION || 'google-oauth2').trim(),
   sessionSecret: process.env.SESSION_SECRET || 'nextgen-dev-session-secret-change-me',
   allowedDomain: process.env.ALLOWED_EMAIL_DOMAIN || 'ninjavan.co',
   emailAllowlist: (process.env.EMAIL_ALLOWLIST || 'diniseprilia@gmail.com')

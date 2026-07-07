@@ -1,6 +1,6 @@
 # NextGen Backend
 
-Express API server for the NextGen learning portal. It handles **Google SSO authentication**, **users & teams**, **courses & quiz attempts**, material **metadata** in **MongoDB**, and uploaded **file binaries** in **MinIO**. The server also serves the static frontend from the project root on the same origin.
+Express API server for the NextGen learning portal. It handles **Auth0 + Google SSO authentication**, **users & teams**, **courses & quiz attempts**, material **metadata** in **MongoDB**, and uploaded **file binaries** in **MinIO**. The server also serves the static frontend from the project root on the same origin.
 
 For product requirements, see [`nextgen_spec.md`](../nextgen_spec.md) — sections **4.1** (authentication), **4.4–4.6** (courses, analytics), **4.5** (materials & course management), and **5** (database architecture).
 
@@ -13,7 +13,7 @@ Browser (index.html + js/*.js client modules)
         │
         ▼
   Express API (:3000)
-    ├── /api/auth      →  Google SSO + session cookies
+    ├── /api/auth      →  Auth0 + Google SSO + session cookies
     ├── /api/users     →  MongoDB (users)
     ├── /api/teams     →  MongoDB (teams)
     ├── /api/materials →  MongoDB (metadata) + MinIO (binaries)
@@ -25,7 +25,7 @@ Browser (index.html + js/*.js client modules)
 | Layer | Technology | Role |
 | :--- | :--- | :--- |
 | API | Express + Mongoose | REST endpoints, validation, static file serving |
-| Auth | Google Identity Services + `google-auth-library` | Verify ID tokens; `@ninjavan.co` domain (+ allowlist) |
+| Auth | Auth0 server-side OAuth + `jose` (JWKS) | Google via Auth0; `@ninjavan.co` domain (+ allowlist) enforced server-side |
 | Sessions | HTTP-only signed cookie (`nextgen_session`, 24 h) | Authenticated API access |
 | Users & teams | MongoDB (`users`, `teams` collections) | Accounts, roles, team membership |
 | Courses & attempts | MongoDB (`courses`, `attempts` collections) | Shared course catalog and quiz progress |
@@ -98,18 +98,65 @@ On first boot the server:
 
 ---
 
-## Google Sign-In setup
+## Auth0 + Google SSO setup
 
-1. Open [Google Cloud Console](https://console.cloud.google.com/) → **APIs & Services** → **Credentials**.
-2. Create an **OAuth 2.0 Client ID** (application type: **Web application**).
-3. Add **Authorized JavaScript origins**: `http://localhost:3000` (and your production URL).
-4. Copy the **Client ID** into `.env`:
+NextGen uses **Auth0** as the identity broker. Users still sign in with Google, but the app never talks to Google directly — Auth0 handles the OAuth flow and returns an ID token that the backend verifies.
 
-```bash
-GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+```
+Browser → GET /api/auth/login → Auth0 → Google → GET /api/auth/oauth/callback → session cookie → /
 ```
 
-5. Restart the server and open **http://localhost:3000**.
+### 1. Create an Auth0 application
+
+1. Sign up or log in at [Auth0](https://auth0.com/).
+2. Create an application with type **Regular Web Application** (server-side OAuth).
+3. Under **Settings**, set:
+   - **Allowed Callback URLs**: `http://localhost:3000/api/auth/oauth/callback`
+   - **Allowed Logout URLs**: `http://localhost:3000`
+4. Copy **Domain**, **Client ID**, and **Client Secret** into `.env`:
+
+```bash
+AUTH0_DOMAIN=your-tenant.us.auth0.com
+AUTH0_CLIENT_ID=your-auth0-client-id
+AUTH0_CLIENT_SECRET=your-auth0-client-secret
+AUTH0_CALLBACK_URL=http://localhost:3000/api/auth/oauth/callback
+AUTH0_GOOGLE_CONNECTION=google-oauth2
+```
+
+> If you previously created a **Single Page Application** and saw `Unauthorized` at login, create a new **Regular Web Application** instead — the server exchanges the auth code using the client secret, which avoids SPA token-endpoint issues.
+
+### 2. Enable Google connection
+
+1. In Auth0 Dashboard → **Authentication** → **Social**, enable **Google**.
+2. Open your **NextGen** application → **Connections** tab → enable **google-oauth2**.
+3. Use Auth0 dev keys for testing, or add your own Google OAuth credentials for production.
+
+### 3. Restrict to `@ninjavan.co` (recommended)
+
+Enforce domain rules in **two places**:
+
+1. **Auth0 Post-Login Action** (blocks bad logins early):
+
+```javascript
+exports.onExecutePostLogin = async (event, api) => {
+  const email = (event.user.email || '').toLowerCase();
+  const allowlist = ['diniseprilia@gmail.com'];
+  if (!email.endsWith('@ninjavan.co') && !allowlist.includes(email)) {
+    api.access.deny('Please use your @ninjavan.co Google account.');
+  }
+};
+```
+
+2. **NextGen backend** — `isEmailAllowed()` on `GET /api/auth/oauth/callback` (defense in depth).
+
+### 4. Start the app
+
+```bash
+docker compose up -d
+cd server && npm install && npm run dev
+```
+
+Open **http://localhost:3000** and click **Sign in with Google**.
 
 ### Who can sign in
 
@@ -137,7 +184,11 @@ Copy `.env.example` to `.env` in the **project root** (loaded by `server/src/con
 | `MINIO_ACCESS_KEY` | `minioadmin` | MinIO access key |
 | `MINIO_SECRET_KEY` | `minioadmin` | MinIO secret key |
 | `MINIO_BUCKET` | `nextgen-materials` | Bucket for uploaded files |
-| `GOOGLE_CLIENT_ID` | *(empty)* | Google OAuth Web client ID for Sign-In |
+| `AUTH0_DOMAIN` | *(empty)* | Auth0 tenant domain (e.g. `your-tenant.us.auth0.com`) |
+| `AUTH0_CLIENT_ID` | *(empty)* | Auth0 application client ID |
+| `AUTH0_CLIENT_SECRET` | *(empty)* | Auth0 application client secret (Regular Web App) |
+| `AUTH0_CALLBACK_URL` | *(auto)* | OAuth callback URL; default `http://localhost:3000/api/auth/oauth/callback` |
+| `AUTH0_GOOGLE_CONNECTION` | `google-oauth2` | Auth0 connection name used for Google sign-in |
 | `SESSION_SECRET` | *(dev default)* | HMAC secret for session cookies — change in production |
 | `ALLOWED_EMAIL_DOMAIN` | `ninjavan.co` | Required email domain for SSO |
 | `EMAIL_ALLOWLIST` | `diniseprilia@gmail.com` | Comma-separated extra allowed emails |
@@ -322,10 +373,12 @@ Objects are created on upload and removed on material delete.
 
 | Method | Endpoint | Auth | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/auth/config` | Public | Google client ID and allowed domain |
-| `POST` | `/api/auth/google` | Public | Verify Google ID token; create session |
+| `GET` | `/api/auth/config` | Public | Auth0 settings and callback URL |
+| `GET` | `/api/auth/login` | Public | Start Auth0 Google sign-in |
+| `GET` | `/api/auth/oauth/callback` | Public | OAuth callback; create session |
 | `GET` | `/api/auth/me` | Session | Current user |
-| `POST` | `/api/auth/logout` | Session | Clear session |
+| `GET` | `/api/auth/logout` | Public | Clear session; Auth0 logout |
+| `POST` | `/api/auth/logout` | Session | Clear session cookie |
 
 ### Users
 
@@ -441,14 +494,14 @@ curl -O -J http://localhost:3000/api/materials/{id}/download
 
 | UI area | Client module | API |
 | :--- | :--- | :--- |
-| Login | `js/auth.js` | `POST /api/auth/google`, `GET /api/auth/me` |
+| Login | `js/auth.js` | `GET /api/auth/login`, `GET /api/auth/me` |
 | Users & teams | `js/users-api.js` | `/api/users`, `/api/teams` |
 | Materials tab | `js/materials-api.js` | `/api/materials` |
 | Courses tab | `js/courses-api.js` | `/api/courses` |
 | Quiz & analytics | `js/attempts-api.js` | `/api/attempts` |
 | Question generation | `js/questions-api.js` | `/api/questions/generate` |
 
-When the API is unreachable, materials, courses, and attempts fall back to browser `localStorage`. **Sign-in requires the server** (Google SSO cannot work offline). Cross-user course sync and analytics require the server.
+When the API is unreachable, materials, courses, and attempts fall back to browser `localStorage`. **Sign-in requires the server** (Auth0 SSO cannot work offline). Cross-user course sync and analytics require the server.
 
 ---
 
@@ -465,7 +518,8 @@ When the API is unreachable, materials, courses, and attempts fall back to brows
 
 | Issue | Fix |
 | :--- | :--- |
-| Google Sign-In button missing / "not configured" | Set `GOOGLE_CLIENT_ID` in `.env` and restart the server |
+| Sign-in button missing / "not configured" | Set `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID`, and `AUTH0_CLIENT_SECRET` in `.env` and restart the server |
+| `Unauthorized` during login | Use a **Regular Web Application** in Auth0; callback URL must be `http://localhost:3000/api/auth/oauth/callback` |
 | "Please sign in with your @ninjavan.co Google account" | Use a `@ninjavan.co` account, or the allowlisted admin email |
 | `Failed to start server` / MongoDB connection error | Ensure `docker compose up -d` is running and `MONGODB_URI` is correct |
 | MinIO upload errors | Check MinIO is up at `:9000`; verify `MINIO_ACCESS_KEY` / `MINIO_SECRET_KEY` |

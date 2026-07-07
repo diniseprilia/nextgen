@@ -181,7 +181,7 @@ The SPA uses path-based URLs (History API). Refreshing the browser keeps the use
 
 ### 4.1 Authentication & Session Life Cycle
 
-*   **Sign-in method**: Users authenticate exclusively via **Google Sign-In** (Ninja Van Google SSO). Password login is not supported.
+*   **Sign-in method**: Users authenticate via **Auth0** using **Google SSO** (Ninja Van Google accounts). Password login is not supported. Flow: app → Auth0 → Google → domain check → Auth0 → app session.
 *   **Allowed accounts**:
     - Primary: `@ninjavan.co` Google accounts only.
     - Bootstrap exception: `diniseprilia@gmail.com` (seeded as **Admin** on first server boot).
@@ -205,10 +205,12 @@ The SPA uses path-based URLs (History API). Refreshing the browser keeps the use
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/api/auth/config` | Public Google client ID and allowed domain |
-| `POST` | `/api/auth/google` | Verify Google ID token; find-or-create user; set session cookie |
+| `GET` | `/api/auth/config` | Public Auth0 settings and OAuth callback URL |
+| `GET` | `/api/auth/login` | Redirect to Auth0 → Google sign-in |
+| `GET` | `/api/auth/oauth/callback` | Auth0 OAuth callback; verify token; set session cookie |
 | `GET` | `/api/auth/me` | Current authenticated user |
-| `POST` | `/api/auth/logout` | Clear session cookie |
+| `GET` | `/api/auth/logout` | Clear session and redirect to Auth0 logout |
+| `POST` | `/api/auth/logout` | Clear session cookie (API) |
 
 #### Users & Teams REST API (authenticated)
 
@@ -503,7 +505,8 @@ Users and teams are stored in **MongoDB**.
 | `name` | String | Derived from email local part on auto-registration |
 | `role` | String | `Rookie`, `Master`, or `Admin` |
 | `teamIds` | ObjectId[] | Teams the user belongs to |
-| `googleSub` | String | Google account subject ID (set on first SSO login) |
+| `googleSub` | String | Legacy Google subject ID (optional; pre-Auth0 users) |
+| `auth0Sub` | String | Auth0 subject ID (set on first SSO login) |
 | `lastLogin` | Date | Latest successful sign-in |
 
 **Bootstrap**: On first server boot, seeds `diniseprilia@gmail.com` as **Admin** if not present.
