@@ -52,7 +52,31 @@ Other file types are rejected with: **File format is not supported.**
 
 **PDF**, **Word** (`.docx`; legacy `.doc` when extractable), and **PowerPoint** (`.ppt`, `.pptx`) have text extracted into the `content` field for quiz question generation.
 
-**URL** materials fetch page text on first content request; HTML is stripped and cached in `content`.
+**URL** materials fetch page text on first content request; HTML is stripped and cached in `content`. **Confluence** wiki links (when `CONFLUENCE_*` env vars are set) are fetched via the Confluence REST API instead of anonymous HTTP.
+
+### Confluence URL materials (optional)
+
+Masters add Confluence pages the same way as any **URL** material (title, group, paste the wiki link). When quiz generation calls `GET /api/materials/:id/content`, the server detects Confluence URLs and reads page body text using an API token.
+
+**Supported URL shapes:**
+
+- `https://yourcompany.atlassian.net/wiki/spaces/SPACE/pages/123456789/Page+Title`
+- `https://yourcompany.atlassian.net/wiki/pages/viewpage.action?pageId=123456789`
+
+**Setup:**
+
+1. Create an [Atlassian API token](https://id.atlassian.com/manage-profile/security/api-tokens) for an account that can read the target wiki pages.
+2. Add to `.env`:
+
+```bash
+CONFLUENCE_BASE_URL=https://yourcompany.atlassian.net/wiki
+CONFLUENCE_EMAIL=you@ninjavan.co
+CONFLUENCE_API_TOKEN=your-api-token
+```
+
+3. Restart the server. Paste Confluence links as URL materials — no UI changes required.
+
+If Confluence is not configured, URL materials fall back to anonymous HTTP fetch (works only for public pages).
 
 ### Deletion
 
@@ -194,6 +218,9 @@ Copy `.env.example` to `.env` in the **project root** (loaded by `server/src/con
 | `EMAIL_ALLOWLIST` | `diniseprilia@gmail.com` | Comma-separated extra allowed emails |
 | `BOOTSTRAP_ADMIN_EMAIL` | `diniseprilia@gmail.com` | Admin user seeded on first boot |
 | `GEMINI_API_KEY` | *(empty)* | Google Gemini API key for AI question generation (optional; can also be set in Admin Settings) |
+| `CONFLUENCE_BASE_URL` | *(empty)* | Confluence wiki base URL (e.g. `https://company.atlassian.net/wiki`); optional if derivable from material URL |
+| `CONFLUENCE_EMAIL` | *(empty)* | Atlassian account email for Confluence API |
+| `CONFLUENCE_API_TOKEN` | *(empty)* | Atlassian API token for Confluence page fetch |
 
 ---
 

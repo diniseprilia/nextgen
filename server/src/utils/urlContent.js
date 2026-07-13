@@ -40,3 +40,5 @@ function stripHtml(html) {
     .trim()
     .slice(0, MAX_URL_TEXT);
 }
+
+export { stripHtml as htmlToPlainText };

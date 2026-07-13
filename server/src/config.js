@@ -21,6 +21,11 @@ export const config = {
     .filter(Boolean),
   bootstrapAdminEmail: process.env.BOOTSTRAP_ADMIN_EMAIL || 'diniseprilia@gmail.com',
   geminiApiKey: process.env.GEMINI_API_KEY || '',
+  confluence: {
+    baseUrl: (process.env.CONFLUENCE_BASE_URL || '').trim().replace(/\/$/, ''),
+    email: (process.env.CONFLUENCE_EMAIL || '').trim(),
+    apiToken: (process.env.CONFLUENCE_API_TOKEN || '').trim(),
+  },
   minio: {
     endPoint: process.env.MINIO_ENDPOINT || 'localhost',
     port: Number(process.env.MINIO_PORT) || 9000,

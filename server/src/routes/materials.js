@@ -19,7 +19,7 @@ import {
   isAllowedFile,
   UNSUPPORTED_FILE_ERROR,
 } from '../utils/files.js';
-import { fetchUrlText } from '../utils/urlContent.js';
+import { fetchUrlMaterialText } from '../utils/confluence.js';
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -103,7 +103,7 @@ router.get('/:id/content', async (req, res) => {
         return res.json({ content: material.content });
       }
       try {
-        const fetched = await fetchUrlText(material.sourceUrl);
+        const fetched = await fetchUrlMaterialText(material.sourceUrl);
         if (fetched?.trim()) {
           material.content = fetched;
           await material.save();
@@ -258,7 +258,13 @@ router.put('/:id', upload.single('file'), async (req, res) => {
     if (group?.trim()) material.group = group.trim();
 
     if (material.sourceType === 'url') {
-      if (sourceUrl?.trim()) material.sourceUrl = sourceUrl.trim();
+      if (sourceUrl?.trim()) {
+        const next = sourceUrl.trim();
+        if (next !== material.sourceUrl) {
+          material.sourceUrl = next;
+          material.content = null;
+        }
+      }
     } else if (req.file) {
       if (!isAllowedFile(req.file.originalname)) {
         return res.status(400).json({ error: UNSUPPORTED_FILE_ERROR });

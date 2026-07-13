@@ -325,7 +325,7 @@ Every material record has a `sourceType` of either **`file`** or **`url`**.
 
 *   Master/Admin adds a material by providing **title**, **group**, and **source URL** (no file upload).
 *   The record is saved in MongoDB with `sourceType: "url"`.
-*   When question generation or the content API needs text, the server **fetches and caches** the page content from `sourceUrl` (HTML is stripped to plain text). Cached text is stored in `content`.
+*   When question generation or the content API needs text, the server **fetches and caches** the page content from `sourceUrl`. Public pages use anonymous HTTP (HTML stripped to plain text). **Confluence** wiki URLs use the Confluence REST API when `CONFLUENCE_EMAIL` and `CONFLUENCE_API_TOKEN` are configured server-side. Cached text is stored in `content`.
 *   When any user clicks **View**, the app redirects them to the external URL (`target="_blank"`, `rel="noopener"`).
 
 ##### Grouping & Audit
