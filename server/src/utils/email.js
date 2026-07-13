@@ -12,6 +12,7 @@ export function nameFromEmail(email) {
 export function isEmailAllowed(email) {
   const normalized = email.trim().toLowerCase();
   if (config.emailAllowlist.includes(normalized)) return true;
+  if (config.bootstrapAdminEmail && normalized === config.bootstrapAdminEmail.toLowerCase()) return true;
   const [, domain] = normalized.split('@');
   return domain === config.allowedDomain;
 }
