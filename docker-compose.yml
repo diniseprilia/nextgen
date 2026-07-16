@@ -3,7 +3,7 @@ services:
     image: mongo:7
     container_name: nextgen-mongodb
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"
     volumes:
       - nextgen_mongodb_data:/data/db
     restart: unless-stopped
@@ -12,8 +12,8 @@ services:
     image: minio/minio:latest
     container_name: nextgen-minio
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
