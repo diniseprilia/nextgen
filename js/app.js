@@ -261,7 +261,12 @@ async function showLogin() {
     const authConfig = getAuthConfig();
     const callback = authConfig?.callbackUrl || `${origin}/api/auth/oauth/callback`;
     originHint.innerHTML = `Developer: add this URL in Auth0 → Application → Settings → <strong>Allowed Callback URLs</strong>:<br><code>${callback}</code><br>And <strong>Allowed Logout URLs</strong>: <code>${origin}</code>`;
-    originHint.classList.remove('hidden');
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isLocal) {
+      originHint.classList.remove('hidden');
+    } else {
+      originHint.classList.add('hidden');
+    }
   }
   renderAuth0SignInButton(
     $('#auth0-signin-btn'),
