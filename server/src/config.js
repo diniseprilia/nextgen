@@ -5,9 +5,26 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
+let resolvedMongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
+
+if (!resolvedMongoUri && process.env.MONGODB_HOST) {
+  const host = process.env.MONGODB_HOST;
+  const port = process.env.MONGODB_PORT || 27017;
+  const db = process.env.MONGODB_DATABASE || 'nextgen';
+  const user = process.env.MONGODB_USERNAME || process.env.MONGODB_USER;
+  const pass = process.env.MONGODB_PASSWORD;
+  if (user && pass) {
+    resolvedMongoUri = `mongodb://${user}:${pass}@${host}:${port}/${db}`;
+  } else {
+    resolvedMongoUri = `mongodb://${host}:${port}/${db}`;
+  }
+}
+
+resolvedMongoUri = resolvedMongoUri || 'mongodb://localhost:27017/nextgen';
+
 export const config = {
   port: Number(process.env.PORT) || 3000,
-  mongoUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/nextgen',
+  mongoUri: resolvedMongoUri,
   auth0Domain: (process.env.AUTH0_DOMAIN || '').trim(),
   auth0ClientId: (process.env.AUTH0_CLIENT_ID || '').trim(),
   auth0ClientSecret: (process.env.AUTH0_CLIENT_SECRET || '').trim(),
