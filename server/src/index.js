@@ -52,6 +52,10 @@ app.get(SPA_ROUTE_PATTERN, (_req, res) => {
   res.sendFile(path.join(rootDir, 'index.html'));
 });
 
+app.get('/health', (_req, res) => {
+  res.json({ status: 'UP', timestamp: new Date() });
+});
+
 app.get('/api/health', async (_req, res) => {
   const [materials, courses] = await Promise.all([
     Material.countDocuments(),
