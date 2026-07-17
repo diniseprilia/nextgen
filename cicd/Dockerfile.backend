@@ -1,4 +1,11 @@
-# Use Node.js 22 Alpine as the base image
+# Backend image for Substrait. Built from the REPO ROOT, so COPY paths are
+# repo-relative (COPY server/...). The contract is behavioural: this image must
+# EXPOSE 8000, serve GET /health (the readiness probe), and your API under /api.
+#
+# The backend container runs with ALL Linux capabilities dropped. A capless process
+# (node, etc.) is fine; stock `nginx` is NOT — it chowns /var/cache/nginx at startup
+# (needs CAP_CHOWN) and crashloops. For a static-only backend use
+# `nginxinc/nginx-unprivileged` (rootless, no startup chown; keep `listen 8000`).
 FROM node:22-alpine
 
 # Set working directory to /app
