@@ -4,7 +4,7 @@ import { getAttempts, getLatestAttempt, getCourseProgressStatus, getAllAttemptsF
 import { getUsers, getTeams, getUserById, loadUsersAndTeams, getAccessibleTeams, getInvitableTeams, userHasTeams, inviteUserToTeam, removeTeamMember, updateUserRole, promoteToAdmin, demoteAdmin, createTeam, deleteTeam, searchUsers, getGlobalLeaderboard, getTeamLeaderboard, isTop3Global, isTop3Team } from './users-api.js';
 import { refreshMaterials, loadMaterials, getMaterialsList, createMaterial, updateMaterial, deleteMaterial, getDownloadUrl, getPreviewUrl, getContentUrl, fetchMaterialTextsForGeneration, isUrlMaterial, isFileMaterial, formatBytes, isApiAvailable, ALLOWED_MATERIAL_EXTENSIONS, UNSUPPORTED_FILE_ERROR } from './materials-api.js';
 import { logout, getCurrentUser, checkSession, refreshCurrentUser, setCurrentUser, isMasterOrAdmin, isAdmin, canManageAdmins, canInviteUsers, formatLastLogin, initAuth, renderAuth0SignInButton, getAuthConfig } from './auth.js';
-import { generateQuestions, scoreAttempt, formatDuration, normalizeFormats, isShortAnswerQuestion, isAnswerCorrect } from './quiz.js';
+import { generateQuestions, scoreAttempt, formatDuration, normalizeFormats, isShortAnswerQuestion, isAnswerCorrect, evaluateQuestionFraction } from './quiz.js';
 import { drawBarChart, drawProgressRings, drawLineChart } from './charts.js';
 import { parsePath, syncUrl, getPathForNav, resolveTeamId } from './router.js';
 
@@ -571,19 +571,37 @@ function showCourseResult(courseId) {
   $('#course-result-breadcrumb').innerHTML = `<a href="#" data-back-team>Team Board</a> › <span>${course.title}</span>`;
   $('#course-result-breadcrumb [data-back-team]').onclick = (e) => { e.preventDefault(); navigateToTeamTab('courses'); };
 
-  const correct = course.questions.filter((q) => isAnswerCorrect(q, attempt.answers?.[q.id])).length;
+  let fullCorrectCount = 0;
   const answers = course.questions.map((q) => {
-    const ok = isAnswerCorrect(q, attempt.answers?.[q.id]);
-    let chosen;
-    let correctAns;
-    if (isShortAnswerQuestion(q)) {
-      chosen = attempt.answers?.[q.id] || '—';
-      correctAns = q.correctAnswer || '—';
+    const fraction = evaluateQuestionFraction(q, attempt.answers?.[q.id]);
+    const ok = fraction >= 0.999;
+    if (ok) fullCorrectCount++;
+
+    let chosenText = '—';
+    let correctAnsText = '—';
+
+    if (q.format === 'essay') {
+      chosenText = attempt.answers?.[q.id] || '—';
+      correctAnsText = q.referenceAnswer || q.correctAnswer || '—';
+    } else if (q.format === 'matching') {
+      const uMatches = attempt.answers?.[q.id] || {};
+      chosenText = Object.entries(uMatches).map(([l, r]) => `${l} → ${r}`).join('; ') || '—';
+      correctAnsText = (q.matchingPairs || []).map((p) => `${p.left} → ${p.right}`).join('; ');
+    } else if (q.format === 'multi_select') {
+      const uSel = Array.isArray(attempt.answers?.[q.id]) ? attempt.answers?.[q.id] : [];
+      chosenText = uSel.map((i) => q.options?.[i]).filter(Boolean).join(', ') || 'None selected';
+      const cSel = Array.isArray(q.correctAnswers) ? q.correctAnswers : [];
+      correctAnsText = cSel.map((i) => q.options?.[i]).filter(Boolean).join(', ');
+    } else if (isShortAnswerQuestion(q)) {
+      chosenText = attempt.answers?.[q.id] || '—';
+      correctAnsText = q.correctAnswer || '—';
     } else {
-      chosen = q.options?.[attempt.answers?.[q.id]] || '—';
-      correctAns = q.options?.[q.correctAnswer] || '—';
+      chosenText = q.options?.[attempt.answers?.[q.id]] || '—';
+      correctAnsText = q.options?.[q.correctAnswer] || '—';
     }
-    return `<li class="ng-answer-item ${ok ? 'correct' : 'incorrect'}">${ok ? '✓' : '✗'} ${q.question.slice(0, 80)} — <strong>${ok ? correctAns : `You: ${chosen} · Correct: ${correctAns}`}</strong></li>`;
+
+    const pctLabel = Math.round(fraction * 100);
+    return `<li class="ng-answer-item ${ok ? 'correct' : 'incorrect'}">${ok ? '✓' : '✗'} [${pctLabel}%] ${q.question.slice(0, 100)} — <strong>${ok ? correctAnsText : `You: ${chosenText} · Correct: ${correctAnsText}`}</strong></li>`;
   }).join('');
 
   $('#course-result-content').innerHTML = `
@@ -592,7 +610,7 @@ function showCourseResult(courseId) {
     <div class="ng-course-meta"><span>Attempted: ${new Date(attempt.completedAt).toLocaleDateString()}</span><span>Duration: ${formatDuration(attempt.durationSeconds)}</span></div></div>
     <div class="ng-result-grid">
       <div class="ng-result-stat"><div class="value">${attempt.score}%</div><div class="label">Your score</div></div>
-      <div class="ng-result-stat"><div class="value">${correct}/${course.questions.length}</div><div class="label">Correct</div></div>
+      <div class="ng-result-stat"><div class="value">${fullCorrectCount}/${course.questions.length}</div><div class="label">Full Credit Questions</div></div>
       <div class="ng-result-stat"><div class="value">${getAllAttemptsForUserCourse(currentUser.id, courseId).length}</div><div class="label">Attempts</div></div>
     </div>
     <div class="ng-panel"><div class="ng-panel-header"><h3>Answer summary</h3></div><ul class="ng-answer-list">${answers}</ul></div>
@@ -638,8 +656,23 @@ function showCourseMgmtReview(courseId) {
   $('#course-mgmt-breadcrumb').innerHTML = `<a href="#" data-back-courses>Courses</a> › <span>${course.title}</span>`;
   $('#course-mgmt-breadcrumb [data-back-courses]').onclick = (e) => { e.preventDefault(); navigateToTeamTab('courses'); };
 
-  const questions = (course.questions || []).map((q, i) => `
-    <div class="ng-question-review"><strong>Q${i + 1}.</strong> ${q.question}<div class="correct-answer">✓ Correct: ${q.options?.[q.correctAnswer] || q.correctAnswer}</div></div>`).join('');
+  const questions = (course.questions || []).map((q, i) => {
+    let answerDisplay = '';
+    if (q.format === 'essay') {
+      answerDisplay = `Reference Answer: ${q.referenceAnswer || q.correctAnswer || ''}`;
+      if (q.rubricPoints?.length) answerDisplay += `<br>Rubric Key Points: ${q.rubricPoints.join(', ')}`;
+    } else if (q.format === 'matching') {
+      answerDisplay = `Matching Pairs:<br>` + (q.matchingPairs || []).map((p) => `• ${p.left} → <strong>${p.right}</strong>`).join('<br>');
+    } else if (q.format === 'multi_select') {
+      const correctText = (q.correctAnswers || []).map((idx) => q.options?.[idx]).filter(Boolean).join(', ');
+      answerDisplay = `Correct Options: ${correctText}`;
+    } else if (isShortAnswerQuestion(q)) {
+      answerDisplay = `Correct Answer: ${q.correctAnswer}`;
+    } else {
+      answerDisplay = `Correct Option: ${q.options?.[q.correctAnswer] || q.correctAnswer}`;
+    }
+    return `<div class="ng-question-review"><strong>Q${i + 1} (${q.format || 'multiple'}).</strong> ${q.question}<div class="correct-answer">✓ ${answerDisplay}</div></div>`;
+  }).join('');
 
   $('#course-mgmt-review-content').innerHTML = `
     <div class="ng-course-header"><div class="ng-course-header-top"><div><h2>${course.title}</h2><p class="muted">${course.description || ''}</p></div>
@@ -648,8 +681,7 @@ function showCourseMgmtReview(courseId) {
     <div class="ng-toolbar"><button type="button" class="ng-btn ng-btn--outline" data-edit-course>Edit course</button></div>
     <div class="ng-panel"><div class="ng-panel-header"><h3>Generated questions</h3><span>Showing correct answers</span></div>${questions || '<p class="muted">No questions yet. Use Edit course to generate questions.</p>'}</div>
     <button type="button" class="ng-btn ng-btn--outline" data-back-courses>← Back</button>`;
-
-  $('#course-mgmt-review-content [data-edit-course]').onclick = () => openCourseDialog(courseId);
+  $('#course-mgmt-review-content [data-edit-course]').onclick = () => openCourseDialog(course.id);
   $('#course-mgmt-review-content [data-back-courses]').onclick = () => navigateToTeamTab('courses');
 }
 
@@ -1450,15 +1482,55 @@ function renderQuizQuestion() {
 
   const pct = (qIndex / questions.length) * 100;
   const shortAnswer = isShortAnswerQuestion(q);
-  const answerBlock = shortAnswer
-    ? `<div class="ng-quiz-short-answer">
+
+  let answerBlock = '';
+  if (q.format === 'essay') {
+    const essayVal = answers[q.id] !== undefined ? String(answers[q.id]) : '';
+    answerBlock = `<div class="ng-quiz-essay" style="margin-bottom:var(--ng-space-4);">
+      <textarea class="ng-textarea" id="quiz-essay-input" rows="5" style="width:100%;padding:var(--ng-space-3);border:1px solid var(--ng-border);border-radius:var(--ng-radius-md);" placeholder="Type your paragraph answer here...">${essayVal.replace(/</g, '&lt;')}</textarea>
+    </div>`;
+  } else if (q.format === 'matching') {
+    const pairs = q.matchingPairs || [];
+    const currentMatches = (typeof answers[q.id] === 'object' && answers[q.id]) ? answers[q.id] : {};
+    const allRightOptions = [...new Set(pairs.map((p) => p.right))].sort();
+
+    answerBlock = `<div class="ng-quiz-matching" style="display:flex;flex-direction:column;gap:var(--ng-space-3);margin-bottom:var(--ng-space-4);">
+      ${pairs.map((pair) => {
+        const selVal = currentMatches[pair.left] || '';
+        return `<div class="matching-pair-row" style="display:flex;align-items:center;gap:var(--ng-space-3);background:var(--ng-surface);padding:var(--ng-space-3);border:1px solid var(--ng-border);border-radius:var(--ng-radius-md);">
+          <div style="flex:1;font-weight:500;">${pair.left}</div>
+          <div style="width:24px;text-align:center;">→</div>
+          <div style="flex:1;">
+            <select class="ng-select quiz-matching-select" data-left="${pair.left.replace(/"/g, '&quot;')}" style="width:100%;padding:var(--ng-space-2);border:1px solid var(--ng-border);border-radius:var(--ng-radius-sm);">
+              <option value="">-- Select match --</option>
+              ${allRightOptions.map((opt) => `<option value="${opt.replace(/"/g, '&quot;')}" ${selVal === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+            </select>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  } else if (q.format === 'multi_select') {
+    const selectedArr = Array.isArray(answers[q.id]) ? answers[q.id] : [];
+    answerBlock = `<div class="ng-quiz-options">
+      <p class="muted" style="margin-bottom:var(--ng-space-2);font-size:var(--ng-text-sm);">Select all correct options that apply:</p>
+      ${(q.options || []).map((opt, i) => {
+        const isChecked = selectedArr.includes(i);
+        return `<label class="ng-quiz-option ${isChecked ? 'selected' : ''}">
+          <input type="checkbox" class="quiz-multiselect-cb" value="${i}" ${isChecked ? 'checked' : ''} />
+          <span>${opt}</span></label>`;
+      }).join('')}
+    </div>`;
+  } else if (shortAnswer) {
+    answerBlock = `<div class="ng-quiz-short-answer">
         <input type="text" class="ng-input" id="quiz-short-input" placeholder="Type your answer…"
           value="${answers[q.id] !== undefined ? String(answers[q.id]).replace(/"/g, '&quot;') : ''}" />
-      </div>`
-    : `<div class="ng-quiz-options">${q.options.map((opt, i) => `
+      </div>`;
+  } else {
+    answerBlock = `<div class="ng-quiz-options">${(q.options || []).map((opt, i) => `
       <label class="ng-quiz-option ${answers[q.id] === i ? 'selected' : ''}">
         <input type="radio" name="quiz-opt" value="${i}" ${answers[q.id] === i ? 'checked' : ''} />
         <span>${opt}</span></label>`).join('')}</div>`;
+  }
 
   content.innerHTML = `
     <div class="ng-quiz-progress"><span>Question ${qIndex + 1} of ${questions.length}</span>
@@ -1473,7 +1545,30 @@ function renderQuizQuestion() {
         <button type="button" class="ng-btn ng-btn--brand" id="quiz-next">${qIndex === questions.length - 1 ? 'Submit' : 'Next'}</button>
       </div></div>`;
 
-  if (shortAnswer) {
+  if (q.format === 'essay') {
+    const input = $('#quiz-essay-input');
+    input.oninput = () => { answers[q.id] = input.value; };
+  } else if (q.format === 'matching') {
+    if (!answers[q.id] || typeof answers[q.id] !== 'object') answers[q.id] = {};
+    content.querySelectorAll('.quiz-matching-select').forEach((sel) => {
+      sel.onchange = () => {
+        answers[q.id][sel.dataset.left] = sel.value;
+      };
+    });
+  } else if (q.format === 'multi_select') {
+    if (!Array.isArray(answers[q.id])) answers[q.id] = [];
+    content.querySelectorAll('.quiz-multiselect-cb').forEach((cb) => {
+      cb.onchange = () => {
+        const val = Number(cb.value);
+        if (cb.checked) {
+          if (!answers[q.id].includes(val)) answers[q.id].push(val);
+        } else {
+          answers[q.id] = answers[q.id].filter((x) => x !== val);
+        }
+        renderQuizQuestion();
+      };
+    });
+  } else if (shortAnswer) {
     const input = $('#quiz-short-input');
     input.oninput = () => { answers[q.id] = input.value; };
     input.onkeydown = (e) => {
@@ -1487,13 +1582,26 @@ function renderQuizQuestion() {
   $('#btn-close-quiz-inline').onclick = () => closeQuizCourse();
   $('#quiz-prev')?.addEventListener('click', () => { quizState.qIndex--; renderQuizQuestion(); });
   $('#quiz-next').onclick = () => {
-    if (shortAnswer) {
+    if (q.format === 'essay') {
+      const val = $('#quiz-essay-input')?.value?.trim();
+      if (!val) return appAlert('Please write a paragraph response before proceeding.');
+      answers[q.id] = val;
+    } else if (q.format === 'matching') {
+      const currentMatches = answers[q.id] || {};
+      const pairs = q.matchingPairs || [];
+      const matchedCount = pairs.filter((p) => currentMatches[p.left]).length;
+      if (matchedCount < pairs.length) return appAlert('Please match all pairs before proceeding.');
+    } else if (q.format === 'multi_select') {
+      const selected = answers[q.id] || [];
+      if (!selected.length) return appAlert('Please select at least one option.');
+    } else if (shortAnswer) {
       const val = $('#quiz-short-input')?.value?.trim();
       if (!val) return appAlert('Type your answer.');
       answers[q.id] = val;
     } else if (answers[q.id] === undefined) {
       return appAlert('Select an answer.');
     }
+
     if (qIndex < questions.length - 1) { quizState.qIndex++; renderQuizQuestion(); }
     else finishQuiz();
   };

@@ -66,15 +66,86 @@ export function isShortAnswerQuestion(q) {
 }
 
 export function isAnswerCorrect(q, userAnswer) {
+  return evaluateQuestionFraction(q, userAnswer) >= 0.999;
+}
+
+export function evaluateEssaySimilarity(referenceText, rubricPoints, userText) {
+  const given = normalizeText(userText);
+  if (!given) return 0;
+
+  const tokenize = (str) => String(str || '').toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter((w) => w.length > 2);
+  const userWords = new Set(tokenize(given));
+  const targetWords = tokenize(referenceText);
+  if (!targetWords.length && (!rubricPoints || !rubricPoints.length)) return 1.0;
+
+  let matchedTarget = 0;
+  targetWords.forEach((w) => { if (userWords.has(w)) matchedTarget++; });
+  const refCoverage = targetWords.length ? matchedTarget / targetWords.length : 0;
+
+  let rubricCoverage = 1.0;
+  if (Array.isArray(rubricPoints) && rubricPoints.length) {
+    let matchedRubric = 0;
+    rubricPoints.forEach((pt) => {
+      const ptWords = tokenize(pt);
+      if (ptWords.some((w) => userWords.has(w))) matchedRubric++;
+    });
+    rubricCoverage = matchedRubric / rubricPoints.length;
+  }
+
+  const similarity = Math.min(1.0, (refCoverage * 0.6) + (rubricCoverage * 0.4));
+  return similarity >= 0.80 ? similarity : 0;
+}
+
+export function evaluateQuestionFraction(q, userAnswer) {
+  if (!q) return 0;
+
+  if (q.format === 'essay') {
+    return evaluateEssaySimilarity(q.referenceAnswer || q.correctAnswer, q.rubricPoints, userAnswer);
+  }
+
+  if (q.format === 'matching') {
+    if (!q.matchingPairs || !q.matchingPairs.length) return 1.0;
+    if (!userAnswer || typeof userAnswer !== 'object') return 0;
+    let correctCount = 0;
+    q.matchingPairs.forEach((pair) => {
+      const selectedRight = String(userAnswer[pair.left] ?? '').trim().toLowerCase();
+      const expectedRight = String(pair.right ?? '').trim().toLowerCase();
+      if (selectedRight && selectedRight === expectedRight) {
+        correctCount++;
+      }
+    });
+    return correctCount / q.matchingPairs.length;
+  }
+
+  if (q.format === 'multi_select') {
+    const expected = Array.isArray(q.correctAnswers) ? q.correctAnswers : [];
+    if (!expected.length) return 1.0;
+    const selected = Array.isArray(userAnswer) ? userAnswer : [];
+    if (!selected.length) return 0;
+
+    const expectedSet = new Set(expected);
+    let correctSelected = 0;
+    let incorrectSelected = 0;
+
+    selected.forEach((idx) => {
+      if (expectedSet.has(idx)) correctSelected++;
+      else incorrectSelected++;
+    });
+
+    const netScore = (correctSelected - incorrectSelected) / expected.length;
+    return Math.max(0, Math.min(1.0, netScore));
+  }
+
   if (isShortAnswerQuestion(q)) {
     const given = normalizeText(userAnswer);
-    if (!given) return false;
+    if (!given) return 0;
     const expected = normalizeText(q.correctAnswer);
-    if (given === expected) return true;
+    if (given === expected) return 1.0;
     const acceptable = (q.acceptableAnswers || []).map(normalizeText);
-    return acceptable.includes(given);
+    return acceptable.includes(given) ? 1.0 : 0.0;
   }
-  return userAnswer === q.correctAnswer;
+
+  return userAnswer === q.correctAnswer ? 1.0 : 0.0;
 }
 
 export async function generateQuestions(materialTexts, formats, count) {
@@ -137,6 +208,41 @@ function generateLocalQuestions(text, format, count) {
         explanation: `The correct answer is "${answer}".`,
         format: 'short',
       }));
+    } else if (format === 'essay') {
+      const rubricWords = sentence.split(/\s+/).filter((w) => w.length > 5).slice(0, 3);
+      questions.push({
+        id: uid('q'),
+        question: `In a brief paragraph, explain the main concept described here:\n\n"${sentence.slice(0, 150)}…"`,
+        referenceAnswer: sentence,
+        rubricPoints: rubricWords,
+        explanation: `A thorough response should address key points: ${rubricWords.join(', ')}.`,
+        format: 'essay',
+      });
+    } else if (format === 'matching') {
+      const pairs = sentences.slice(i, i + 3).map((s) => {
+        const { masked, answer } = maskWord(s);
+        return { left: masked.slice(0, 80) + '…', right: answer };
+      });
+      questions.push({
+        id: uid('q'),
+        question: 'Match each incomplete sentence with its correct missing term.',
+        matchingPairs: pairs.length ? pairs : [{ left: 'Process step 1', right: 'Start' }, { left: 'Process step 2', right: 'Finish' }],
+        explanation: 'Each term matches its corresponding sentence context in the material.',
+        format: 'matching',
+      });
+    } else if (format === 'multi_select') {
+      const { masked, answer } = maskWord(sentence);
+      const others = wordPool.filter((w) => w.toLowerCase() !== answer.toLowerCase()).slice(0, 2);
+      const options = [answer, wordPool[0] || 'Key Term', ...others].sort(() => Math.random() - 0.5);
+      const correctAnswers = [options.indexOf(answer), options.indexOf(wordPool[0] || 'Key Term')].filter((idx) => idx !== -1);
+      questions.push({
+        id: uid('q'),
+        question: `Select ALL terms that are relevant to this material context:\n\n"${sentence.slice(0, 120)}…"`,
+        options,
+        correctAnswers: correctAnswers.length ? correctAnswers : [0],
+        explanation: 'The selected correct terms are directly mentioned in the material context.',
+        format: 'multi_select',
+      });
     } else {
       const { masked, answer } = maskWord(sentence);
       const { options, correctAnswer } = buildDistractors(answer, wordPool);
@@ -155,12 +261,19 @@ function generateLocalQuestions(text, format, count) {
 }
 
 export function scoreAttempt(questions, answers) {
-  let correct = 0;
+  if (!questions || !questions.length) return { score: 0, correct: 0, total: questions.length };
+  let totalFraction = 0;
+  let fullCorrectCount = 0;
+
   questions.forEach((q) => {
-    if (isAnswerCorrect(q, answers[q.id])) correct++;
+    const fraction = evaluateQuestionFraction(q, answers[q.id]);
+    totalFraction += fraction;
+    if (fraction >= 0.999) fullCorrectCount++;
   });
-  const score = questions.length ? Math.round((correct / questions.length) * 100) : 0;
-  return { score, correct, total: questions.length };
+
+  const pointsPerQuestion = 100 / questions.length;
+  const score = Math.round(totalFraction * pointsPerQuestion);
+  return { score, correct: fullCorrectCount, total: questions.length };
 }
 
 export function formatDuration(seconds) {

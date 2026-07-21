@@ -353,15 +353,22 @@ Every material record has a `sourceType` of either **`file`** or **`url`**.
     - Selected materials are displayed in a **Selected Materials** list beside the picker, with the ability to remove individual selections.
     - Question generation loads text from material `content` (including PDF/Word/PowerPoint extraction, public URL fetch, and **Confluence API fetch** via `GET /api/materials/:id/content` when needed).
 *   **Multiple Question Formats**:
-    - Master/Admin can choose **one or more** formats: Multiple Choice, True/False, Short Answer.
+    - Master/Admin can choose **one or more** formats: Multiple Choice, True/False, Short Answer, Essay, Mix & Match, Multiple Answer.
     - Question generation distributes the requested question count across the selected formats.
 *   **Question formats & schemas**:
     - **Multiple choice** (`format: "multiple"`): Open question with exactly 4 options. `correctAnswer` is the 0-based index of the correct option.
     - **True/False** (`format: "truefalse"`): Statement with options `["True", "False"]`. `correctAnswer` is `0` (True) or `1` (False).
-    - **Short answer** (`format: "short"`): Open-ended question with **no options**. The learner types a free-text answer. `correctAnswer` is a string of **one or two words** expected from the material. Scoring is case-insensitive exact match; optional `acceptableAnswers[]` may list alternate acceptable strings (also one or two words each).
-*   **Question Generation**: Generates questions from selected material contents and formats (Gemini API if configured, otherwise local parser). Available only from the **create/edit course** dialog. Short-answer questions use a distinct JSON shape (no `options` array).
+    - **Short answer** (`format: "short"`): Open-ended question with **no options**. The learner types a free-text answer. `correctAnswer` is a string of **one or two words** expected from the material. Scoring is case-insensitive exact match; optional `acceptableAnswers[]` may list alternate acceptable strings.
+    - **Essay** (`format: "essay"`): Open-ended paragraph response question. `referenceAnswer` contains expected key answer text; optional `rubricPoints[]` lists key concepts. Evaluated by checking similarity score against reference answer key points (threshold: $\ge 80\%$).
+    - **Mix & Match** (`format: "matching"`): Pair-matching question. `matchingPairs` contains an array of `{ left: string, right: string }` pairs. Learner matches left items to right items. Partial credit is awarded based on proportion of correct pairs matched.
+    - **Multiple Answer** (`format: "multi_select"`): Checkbox selection with 1 or more correct options. `options` contains choices; `correctAnswers` is an array of 0-based indices of correct options. Partial credit formula applies with penalty for incorrect choices selected: $\max\left(0, \frac{\text{Correct Selected} - \text{Incorrect Selected}}{\text{Total Correct}}\right)$.
+*   **100-Point Normalized Scoring Model**:
+    - The quiz score total is always normalized to **100 points** regardless of total question count $N$ or mixed question formats.
+    - Each question $i$ yields a fractional score $S_i \in [0.0, 1.0]$.
+    - Total quiz score is calculated as $\text{Math.round}\left( \frac{100}{N} \times \sum_{i=1}^N S_i \right)$.
+*   **Question Generation**: Generates questions from selected material contents and formats (Gemini API if configured, otherwise local parser). Available only from the **create/edit course** dialog.
 *   **Review Flow**: Master/Admin can:
-    - Open **Review** from the course list to see generated questions and correct answers (read-only).
+    - Open **Review** from the course list to see generated questions, correct options/answers/pairs, and explanations (read-only).
     - Open **Edit course** to change settings, generate or re-generate questions, save draft, publish, or delete.
 *   **Min Score**: Define a minimum passing score.
 *   **Course States** (automatic — no manual status dropdown):

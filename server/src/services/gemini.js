@@ -14,6 +14,15 @@ function formatInstruction(format) {
   if (format === 'short') {
     return 'Each question must be a short answer (open-ended). The learner will type a free-text answer. Do NOT include options. correctAnswer must be exactly one or two words from the material (no sentences or phrases longer than two words). Questions should expect brief factual answers.';
   }
+  if (format === 'essay') {
+    return 'Each question must be an open-ended essay question requiring a short paragraph response. Do NOT include options. Provide referenceAnswer (a concise reference paragraph answering the question) and rubricPoints (an array of 2-3 key points/concepts expected in the answer).';
+  }
+  if (format === 'matching') {
+    return 'Each question must be a Mix and Match question. Do NOT include options. Provide matchingPairs as an array of 3 to 4 objects, each with "left" (term or concept) and "right" (definition or matching pair).';
+  }
+  if (format === 'multi_select') {
+    return 'Each question must be a multiple answer question with exactly 4 options where MORE THAN ONE option is correct. Provide correctAnswers as an array of 0-based indices of all correct options (e.g. [0, 2]).';
+  }
   return 'Each question is multiple choice with exactly 4 options and correctAnswer as the 0-based index.';
 }
 
@@ -23,6 +32,33 @@ function buildUserPrompt(count, format, materialText) {
 ${formatInstruction(format)}
 Return ONLY a valid JSON array with this shape:
 [{"question":"...","correctAnswer":"expected answer text","explanation":"..."}]
+
+Material:
+${materialText}`;
+  }
+  if (format === 'essay') {
+    return `Generate ${count} essay quiz questions from this training material.
+${formatInstruction(format)}
+Return ONLY a valid JSON array with this shape:
+[{"question":"...","referenceAnswer":"reference answer text","rubricPoints":["key point 1","key point 2"],"explanation":"..."}]
+
+Material:
+${materialText}`;
+  }
+  if (format === 'matching') {
+    return `Generate ${count} mix and match quiz questions from this training material.
+${formatInstruction(format)}
+Return ONLY a valid JSON array with this shape:
+[{"question":"Match each term with its correct definition.","matchingPairs":[{"left":"Term 1","right":"Definition 1"},{"left":"Term 2","right":"Definition 2"}],"explanation":"..."}]
+
+Material:
+${materialText}`;
+  }
+  if (format === 'multi_select') {
+    return `Generate ${count} multiple answer quiz questions (select all that apply) from this training material.
+${formatInstruction(format)}
+Return ONLY a valid JSON array with this shape:
+[{"question":"...","options":["Option A","Option B","Option C","Option D"],"correctAnswers":[0,2],"explanation":"..."}]
 
 Material:
 ${materialText}`;
@@ -63,6 +99,42 @@ function parseQuestionsJson(text, format) {
         question: q.question,
         correctAnswer: words.join(' '),
         acceptableAnswers: acceptable,
+        explanation: q.explanation || '',
+        format,
+      };
+    }
+    if (format === 'essay') {
+      return {
+        id: `q_${Date.now()}_${i}`,
+        question: q.question,
+        referenceAnswer: String(q.referenceAnswer || q.correctAnswer || '').trim(),
+        rubricPoints: Array.isArray(q.rubricPoints) ? q.rubricPoints.map(String) : [],
+        explanation: q.explanation || '',
+        format,
+      };
+    }
+    if (format === 'matching') {
+      const pairs = Array.isArray(q.matchingPairs)
+        ? q.matchingPairs.filter((p) => p && typeof p === 'object' && p.left && p.right)
+            .map((p) => ({ left: String(p.left).trim(), right: String(p.right).trim() }))
+        : [];
+      return {
+        id: `q_${Date.now()}_${i}`,
+        question: q.question || 'Match the items in Column A with Column B.',
+        matchingPairs: pairs,
+        explanation: q.explanation || '',
+        format,
+      };
+    }
+    if (format === 'multi_select') {
+      const correctAnswers = Array.isArray(q.correctAnswers)
+        ? q.correctAnswers.map(Number).filter((n) => !isNaN(n))
+        : (typeof q.correctAnswer === 'number' ? [q.correctAnswer] : []);
+      return {
+        id: `q_${Date.now()}_${i}`,
+        question: q.question,
+        options: Array.isArray(q.options) ? q.options.map(String) : [],
+        correctAnswers,
         explanation: q.explanation || '',
         format,
       };
