@@ -62,7 +62,8 @@ function normalizeText(value) {
 }
 
 export function isShortAnswerQuestion(q) {
-  return q.format === 'short' || (!q.options?.length && typeof q.correctAnswer === 'string');
+  if (q?.format) return q.format === 'short';
+  return Boolean(!q?.options?.length && typeof q?.correctAnswer === 'string' && !q?.matchingPairs && !q?.referenceAnswer);
 }
 
 export function isAnswerCorrect(q, userAnswer) {

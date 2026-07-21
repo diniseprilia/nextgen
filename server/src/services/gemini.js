@@ -85,17 +85,30 @@ function splitCount(total, parts) {
   return Array.from({ length: parts }, (_, i) => base + (i < remainder ? 1 : 0));
 }
 
+function extractJsonText(rawText) {
+  let str = String(rawText || '').trim();
+  str = str.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  const start = str.indexOf('[');
+  const end = str.lastIndexOf(']');
+  if (start !== -1 && end !== -1 && end > start) {
+    str = str.substring(start, end + 1);
+  }
+  return str;
+}
+
 function parseQuestionsJson(text, format) {
-  const parsed = JSON.parse(text);
+  const cleaned = extractJsonText(text);
+  const parsed = JSON.parse(cleaned);
   if (!Array.isArray(parsed)) return [];
   return parsed.map((q, i) => {
+    const uidStr = `q_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 6)}`;
     if (format === 'short') {
-      const words = String(q.correctAnswer ?? '').trim().split(/\s+/).filter(Boolean).slice(0, 2);
+      const words = String(q.correctAnswer ?? q.answer ?? '').trim().split(/\s+/).filter(Boolean).slice(0, 2);
       const acceptable = (Array.isArray(q.acceptableAnswers) ? q.acceptableAnswers : [])
         .map((a) => String(a).trim().split(/\s+/).filter(Boolean).slice(0, 2).join(' '))
         .filter(Boolean);
       return {
-        id: `q_${Date.now()}_${i}`,
+        id: uidStr,
         question: q.question,
         correctAnswer: words.join(' '),
         acceptableAnswers: acceptable,
@@ -104,46 +117,66 @@ function parseQuestionsJson(text, format) {
       };
     }
     if (format === 'essay') {
+      const ref = String(q.referenceAnswer || q.correctAnswer || q.answer || q.reference_answer || '').trim();
+      const rubric = Array.isArray(q.rubricPoints)
+        ? q.rubricPoints.map(String)
+        : (typeof q.rubricPoints === 'string' ? q.rubricPoints.split(',').map((s) => s.trim()) : []);
       return {
-        id: `q_${Date.now()}_${i}`,
+        id: uidStr,
         question: q.question,
-        referenceAnswer: String(q.referenceAnswer || q.correctAnswer || '').trim(),
-        rubricPoints: Array.isArray(q.rubricPoints) ? q.rubricPoints.map(String) : [],
+        referenceAnswer: ref,
+        rubricPoints: rubric,
         explanation: q.explanation || '',
         format,
       };
     }
     if (format === 'matching') {
-      const pairs = Array.isArray(q.matchingPairs)
-        ? q.matchingPairs.filter((p) => p && typeof p === 'object' && p.left && p.right)
-            .map((p) => ({ left: String(p.left).trim(), right: String(p.right).trim() }))
+      const rawPairs = q.matchingPairs || q.pairs || q.matching_pairs || [];
+      const pairs = Array.isArray(rawPairs)
+        ? rawPairs.map((p) => {
+            if (!p || typeof p !== 'object') return null;
+            const left = String(p.left || p.term || p.item || p.key || '').trim();
+            const right = String(p.right || p.definition || p.match || p.value || '').trim();
+            if (left && right) return { left, right };
+            return null;
+          }).filter(Boolean)
         : [];
       return {
-        id: `q_${Date.now()}_${i}`,
-        question: q.question || 'Match the items in Column A with Column B.',
+        id: uidStr,
+        question: q.question || 'Match each concept or term with its corresponding description.',
         matchingPairs: pairs,
         explanation: q.explanation || '',
         format,
       };
     }
     if (format === 'multi_select') {
-      const correctAnswers = Array.isArray(q.correctAnswers)
-        ? q.correctAnswers.map(Number).filter((n) => !isNaN(n))
-        : (typeof q.correctAnswer === 'number' ? [q.correctAnswer] : []);
+      const options = Array.isArray(q.options) ? q.options.map(String) : [];
+      const rawCorrect = q.correctAnswers || q.correct_answers || q.correctAnswer;
+      let correctAnswers = [];
+      if (Array.isArray(rawCorrect)) {
+        correctAnswers = rawCorrect.map((val) => {
+          if (typeof val === 'number') return val;
+          const idx = options.findIndex((opt) => opt.toLowerCase() === String(val).toLowerCase());
+          if (idx !== -1) return idx;
+          const parsedNum = parseInt(val, 10);
+          return isNaN(parsedNum) ? null : parsedNum;
+        }).filter((n) => n !== null && n >= 0 && n < options.length);
+      }
+      if (!correctAnswers.length && options.length) correctAnswers = [0];
       return {
-        id: `q_${Date.now()}_${i}`,
+        id: uidStr,
         question: q.question,
-        options: Array.isArray(q.options) ? q.options.map(String) : [],
+        options,
         correctAnswers,
         explanation: q.explanation || '',
         format,
       };
     }
     return {
-      id: `q_${Date.now()}_${i}`,
+      id: uidStr,
       question: q.question,
-      options: q.options,
-      correctAnswer: q.correctAnswer,
+      options: Array.isArray(q.options) ? q.options.map(String) : [],
+      correctAnswer: typeof q.correctAnswer === 'number' ? q.correctAnswer : 0,
       explanation: q.explanation || '',
       format,
     };

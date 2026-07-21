@@ -1014,12 +1014,27 @@ function renderCourseReview(course) {
   el.classList.remove('hidden');
   el.innerHTML = `<h4>Review Questions (${course.questions.length})</h4>` +
     course.questions.map((q, i) => {
+      if (q.format === 'essay') {
+        return `<div class="question-review"><strong>Q${i + 1} (Essay).</strong> ${q.question}
+          <p class="correct-answer">Reference Answer: ${q.referenceAnswer || q.correctAnswer || ''}</p>
+          ${q.rubricPoints?.length ? `<p class="muted" style="font-size:12px;">Key concepts: ${q.rubricPoints.join(', ')}</p>` : ''}</div>`;
+      }
+      if (q.format === 'matching') {
+        const pairs = q.matchingPairs || [];
+        return `<div class="question-review"><strong>Q${i + 1} (Mix & Match).</strong> ${q.question}
+          <ul>${pairs.map((p) => `<li><span class="correct-answer">${p.left}</span> ➔ <strong>${p.right}</strong></li>`).join('')}</ul></div>`;
+      }
+      if (q.format === 'multi_select') {
+        const correctSet = new Set(q.correctAnswers || []);
+        return `<div class="question-review"><strong>Q${i + 1} (Multiple Answer).</strong> ${q.question}
+          <ul>${(q.options || []).map((o, j) => `<li${correctSet.has(j) ? ' class="correct-answer"' : ''}>${o}${correctSet.has(j) ? ' ✓' : ''}</li>`).join('')}</ul></div>`;
+      }
       if (isShortAnswerQuestion(q)) {
-        return `<div class="question-review"><strong>Q${i + 1}.</strong> ${q.question}
+        return `<div class="question-review"><strong>Q${i + 1} (Short Answer).</strong> ${q.question}
           <p class="correct-answer">Expected answer: ${q.correctAnswer}</p></div>`;
       }
       return `<div class="question-review"><strong>Q${i + 1}.</strong> ${q.question}
-        <ul>${q.options.map((o, j) => `<li${j === q.correctAnswer ? ' class="correct-answer"' : ''}>${o}</li>`).join('')}</ul></div>`;
+        <ul>${(q.options || []).map((o, j) => `<li${j === q.correctAnswer ? ' class="correct-answer"' : ''}>${o}</li>`).join('')}</ul></div>`;
     }).join('');
 }
 
