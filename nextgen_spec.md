@@ -37,7 +37,7 @@ NextGen uses a **fixed light CRM-style layout** (no user theme toggle). Design t
 | **Gold** | `#D97706` | Rank indicators, chart gradients, podium accents |
 
 ### Layout
-*   **Login**: Split-screen — brand panel (ninja icon + NextGen wordmark) left, email/password form right.
+*   **Login**: Split-screen — brand panel (ninja icon + NextGen wordmark) left, **Sign in with Google** (Auth0 → Google SSO) on the right.
 *   **App shell**: Fixed dark sidebar (252px) with ninja icon + nav; white top header (page title, search, user chip); rounded cards on light page background.
 *   **Team Board tabs**: Pill-style tabs below the always-visible Team Performance hero.
 
@@ -181,7 +181,7 @@ The SPA uses path-based URLs (History API). Refreshing the browser keeps the use
 
 ### 4.1 Authentication & Session Life Cycle
 
-*   **Sign-in method**: Users authenticate via **Auth0** using **Google SSO** (Ninja Van Google accounts). Password login is not supported. Flow: app → Auth0 → Google → domain check → Auth0 → app session.
+*   **Sign-in method**: Users authenticate via **Auth0** (Regular Web Application, server-side OAuth) using **Google SSO** (Ninja Van Google accounts). Password login is not supported. Flow: app → `GET /api/auth/login` → Auth0 → Google → domain check → `GET /api/auth/oauth/callback` → session cookie → app.
 *   **Allowed accounts**:
     - Primary: `@ninjavan.co` Google accounts only.
     - Bootstrap exception: `diniseprilia@gmail.com` (seeded as **Admin** on first server boot).
@@ -305,7 +305,7 @@ Every material record has a `sourceType` of either **`file`** or **`url`**.
 | Type | How it is added | Storage | User action on View |
 | :--- | :--- | :--- | :--- |
 | **File** | Upload a document (PDF, Word, or PowerPoint) | Binary in MinIO; metadata + optional extracted text in MongoDB | Open in-app preview dialog; **Download** available |
-| **URL** | Paste an external link (no file upload) | Metadata + cached fetched text in MongoDB (`sourceUrl`, `content`) | Redirect to the external page in a new tab |
+| **URL** | Paste an external or **Confluence wiki** link (no file upload) | Metadata + cached fetched text in MongoDB (`sourceUrl`, `content`) | Redirect to the external page in a new tab |
 
 ##### Upload (File type)
 
@@ -323,10 +323,14 @@ Every material record has a `sourceType` of either **`file`** or **`url`**.
 
 ##### External Link (URL type)
 
-*   Master/Admin adds a material by providing **title**, **group**, and **source URL** (no file upload).
+*   Master/Admin adds a material by providing **title**, **group**, and **source URL** (no file upload). No separate Confluence UI — Masters paste a wiki or public link the same way as any other URL material.
 *   The record is saved in MongoDB with `sourceType: "url"`.
-*   When question generation or the content API needs text, the server **fetches and caches** the page content from `sourceUrl`. Public pages use anonymous HTTP (HTML stripped to plain text). **Confluence** wiki URLs use the Confluence REST API when `CONFLUENCE_EMAIL` and `CONFLUENCE_API_TOKEN` are configured server-side. Cached text is stored in `content`.
-*   When any user clicks **View**, the app redirects them to the external URL (`target="_blank"`, `rel="noopener"`).
+*   When question generation or `GET /api/materials/:id/content` needs text and `content` is empty, the server **fetches and caches** plain text from `sourceUrl`:
+    - **Public / generic URLs**: anonymous HTTP fetch; HTML is stripped to plain text.
+    - **Confluence wiki URLs** (path contains `/wiki/` and a page ID via `/pages/{id}/` or `?pageId=`): when `CONFLUENCE_EMAIL` and `CONFLUENCE_API_TOKEN` are set, the server calls the Confluence REST API (v1, then v2 on 404) with Basic auth (`email:api_token`). The API host is taken from the **material URL origin** (e.g. `https://ninjavan-tech.atlassian.net/wiki`), not only from `CONFLUENCE_BASE_URL`.
+    - If Confluence is not configured or the API call fails, the server falls back to anonymous HTTP (usually insufficient for private wiki pages).
+*   Cached text is stored in `content`. Changing `sourceUrl` on update **clears** `content` so the next content request refetches.
+*   When any user clicks **View**, the app redirects them to the external URL (`target="_blank"`, `rel="noopener"`). Confluence pages open in the wiki; NextGen does not embed Confluence UI.
 
 ##### Grouping & Audit
 
@@ -347,7 +351,7 @@ Every material record has a `sourceType` of either **`file`** or **`url`**.
 *   **Multiple Materials**:
     - Master/Admin can select **one or more** materials when creating or editing a course.
     - Selected materials are displayed in a **Selected Materials** list beside the picker, with the ability to remove individual selections.
-    - Question generation loads text from material `content` (including PDF/Word/PowerPoint extraction and URL fetching via the API when needed).
+    - Question generation loads text from material `content` (including PDF/Word/PowerPoint extraction, public URL fetch, and **Confluence API fetch** via `GET /api/materials/:id/content` when needed).
 *   **Multiple Question Formats**:
     - Master/Admin can choose **one or more** formats: Multiple Choice, True/False, Short Answer.
     - Question generation distributes the requested question count across the selected formats.
@@ -383,6 +387,7 @@ Provides a breakdown of each teammate's progress for the selected course and tea
 *   **Status Indicators**: Shows `"-"` for not attempted, `"in progress"`, or `"Completed (Pass/Fail)"`.
 *   **Attempt Counter**: Tracks the total number of attempts.
 *   **User Taken Time**: Tracks the time taken to complete the course, including the cumulative duration the status remained "in progress."
+*   **Last Attempt Time**: Displays the latest attempt timestamp for the user (including when the status remained "in progress").
 *   **Answer History**: Master/Admin can review the teammate's history of answers for each attempt.
 
 #### Question Quality Analytics
@@ -391,6 +396,15 @@ Provides a breakdown of each teammate's progress for the selected course and tea
 *   **Most Correct**: Questions with the highest accuracy.
 *   **Take Longer to Take**: Questions that users spend the most time answering.
 *   **Take Shorter to Take**: Questions answered most quickly.
+
+---
+
+### 4.7 Users & Roles Management (Admin)
+
+Accessible to Admins at `/userandroles`. Provides centralized management across three tabs:
+*   **Teams Tab**: View teams, member counts, assigned Master, and team creation/deletion options.
+*   **All Users Tab**: Displays all registered users with columns: **Name**, **Email**, **Role**, **Teams**, and **Last Login Time** (showing the latest successful sign-in timestamp or `—`).
+*   **Admins Tab**: Displays current Admins and provides controls for assigning or revoking Admin privileges.
 
 ---
 
@@ -405,6 +419,8 @@ NextGen uses **MongoDB** for application data and **MinIO** (S3-compatible) for 
 | **MongoDB** | Users, teams, courses, attempts, material metadata | `mongodb://localhost:27017/nextgen` |
 | **MinIO** | Uploaded material files (PDF, Word, PowerPoint) | `http://localhost:9000`, bucket `nextgen-materials` |
 | **API Server** | REST API + static frontend | `http://localhost:3000` |
+| **Auth0** | Google SSO broker (Regular Web Application) | Configured via `AUTH0_*` env vars |
+| **Confluence** (optional) | Private wiki page text for URL materials / quiz generation | Configured via `CONFLUENCE_*` env vars |
 
 Run local dependencies with `docker compose up -d` from the project root.
 
@@ -434,17 +450,17 @@ Primary store for the material library. File binaries are **not** stored in Mong
 }
 ```
 
-**URL-type material example:**
+**URL-type material example (public or Confluence):**
 
 ```json
 {
   "_id": "ObjectId",
-  "title": "Last Mile Safety Handbook",
-  "group": "Safety",
+  "title": "Create a driver",
+  "group": "Operations",
   "sourceType": "url",
-  "sourceUrl": "https://docs.ninjavan.co/safety/last-mile",
+  "sourceUrl": "https://ninjavan-tech.atlassian.net/wiki/spaces/QP/pages/28311682/Create+a+driver",
   "file": null,
-  "content": null,
+  "content": "Cached plain text after first content fetch…",
   "createdBy": "u2",
   "createdAt": "2026-06-14T08:00:00.000Z",
   "updatedAt": "2026-06-14T08:00:00.000Z"
@@ -456,7 +472,7 @@ Primary store for the material library. File binaries are **not** stored in Mong
 | `title` | String | Yes | Display name |
 | `group` | String | Yes | Category / grouping label |
 | `sourceType` | `"file"` \| `"url"` | Yes | Determines storage and view behavior |
-| `sourceUrl` | String | URL type only | External link; required when `sourceType` is `url` |
+| `sourceUrl` | String | URL type only | External or Confluence wiki link; required when `sourceType` is `url` |
 | `file` | Object | File type only | MinIO location and file metadata |
 | `file.bucket` | String | — | MinIO bucket name |
 | `file.objectKey` | String | — | Unique object path in MinIO |
@@ -464,7 +480,7 @@ Primary store for the material library. File binaries are **not** stored in Mong
 | `file.mimeType` | String | — | MIME type |
 | `file.sizeBytes` | Number | — | File size in bytes |
 | `file.extension` | String | — | Lowercase extension without dot |
-| `content` | String | No | Extracted text (file uploads) for question generation |
+| `content` | String | No | Plain text for quiz generation (file extraction, public URL fetch, or Confluence API fetch); cleared when `sourceUrl` changes |
 | `createdBy` | String | No | User ID of uploader |
 | `createdAt` | Date | Yes | Auto-set on create |
 | `updatedAt` | Date | Yes | Auto-set on create/update |
@@ -489,8 +505,10 @@ Objects are created on file upload and **hard-deleted** when the parent material
 | `GET` | `/api/materials` | List all materials (metadata only) |
 | `GET` | `/api/materials/:id` | Get one material by ID |
 | `POST` | `/api/materials` | Create material (`multipart/form-data` for file, JSON for URL) |
-| `PUT` | `/api/materials/:id` | Update metadata; optional file replacement |
+| `PUT` | `/api/materials/:id` | Update metadata; optional file replacement; clearing `content` when URL `sourceUrl` changes |
 | `DELETE` | `/api/materials/:id` | Hard delete from MongoDB and MinIO |
+| `GET` | `/api/materials/:id/content` | Plain text for quiz generation (cache, file extract, public URL, or Confluence API) |
+| `GET` | `/api/materials/:id/preview` | Inline file preview (file type only) |
 | `GET` | `/api/materials/:id/download` | Stream / download the file (file type only) |
 
 ### 5.5 Collections: `users` and `teams`
