@@ -262,19 +262,21 @@ function generateLocalQuestions(text, format, count) {
 }
 
 export function scoreAttempt(questions, answers) {
-  if (!questions || !questions.length) return { score: 0, correct: 0, total: questions.length };
+  if (!questions || !questions.length) return { score: 0, correct: 0, total: 0, questionScores: {} };
   let totalFraction = 0;
   let fullCorrectCount = 0;
+  const questionScores = {};
+  const pointsPerQuestion = 100 / questions.length;
 
   questions.forEach((q) => {
-    const fraction = evaluateQuestionFraction(q, answers[q.id]);
+    const fraction = evaluateQuestionFraction(q, answers?.[q.id]);
     totalFraction += fraction;
     if (fraction >= 0.999) fullCorrectCount++;
+    questionScores[q.id] = Math.round(fraction * pointsPerQuestion * 10) / 10;
   });
 
-  const pointsPerQuestion = 100 / questions.length;
   const score = Math.round(totalFraction * pointsPerQuestion);
-  return { score, correct: fullCorrectCount, total: questions.length };
+  return { score, correct: fullCorrectCount, total: questions.length, questionScores };
 }
 
 export function formatDuration(seconds) {

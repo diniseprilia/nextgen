@@ -10,6 +10,7 @@ const attemptSchema = new mongoose.Schema(
     completedAt: { type: Date, default: null },
     durationSeconds: { type: Number, default: 0 },
     answers: { type: mongoose.Schema.Types.Mixed, default: {} },
+    questionScores: { type: mongoose.Schema.Types.Mixed, default: {} },
     qIndex: { type: Number, default: 0 },
     timestamp: { type: Date, default: Date.now },
   },

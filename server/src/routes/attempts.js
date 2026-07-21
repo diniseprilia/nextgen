@@ -18,6 +18,7 @@ function toApiAttempt(doc) {
     completedAt: a.completedAt ? new Date(a.completedAt).toISOString() : null,
     durationSeconds: a.durationSeconds || 0,
     answers: a.answers || {},
+    questionScores: a.questionScores || {},
     qIndex: a.qIndex ?? 0,
     timestamp: a.timestamp ? new Date(a.timestamp).toISOString() : new Date().toISOString(),
   };

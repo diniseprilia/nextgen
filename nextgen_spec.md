@@ -645,7 +645,8 @@ Quiz attempts are stored in **MongoDB** and keyed by `userId` + `courseId`.
 | `openedAt` | Date | Latest open timestamp |
 | `completedAt` | Date \| null | Set when quiz is submitted; null while in progress |
 | `durationSeconds` | Number | Cumulative active time |
-| `answers` | Object | Map of `questionId` → selected option index (MC/TF) or text string (short answer) |
+| `answers` | Object | Map of `questionId` → selected option index (MC/TF), text string, array of indices, or matching object |
+| `questionScores` | Object | Map of `questionId` → score points awarded for each question |
 | `qIndex` | Number | Saved question index for in-progress attempts |
 
 **Indexes:** `{ userId: 1, courseId: 1 }`, `{ courseId: 1, completedAt: -1 }`

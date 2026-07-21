@@ -1221,7 +1221,10 @@ function showAttemptHistory(userId, courseId) {
   const attempts = getAllAttemptsForUserCourse(userId, courseId);
   $('#attempt-history-content').innerHTML = attempts.length ? attempts.map((a, i) => `
     <div class="question-review"><strong>Attempt ${i + 1}</strong> — ${a.score}% · ${a.passed ? 'Pass' : a.completedAt ? 'Fail' : 'In progress'}
-    <pre class="muted" style="font-size:11px;overflow:auto;">${JSON.stringify(a.answers, null, 2)}</pre></div>`).join('') : '<p class="muted">No attempts.</p>';
+    <p style="font-size:12px;font-weight:600;margin-top:var(--ng-space-2);">Answers:</p>
+    <pre class="muted" style="font-size:11px;overflow:auto;max-height:120px;">${JSON.stringify(a.answers, null, 2)}</pre>
+    ${a.questionScores && Object.keys(a.questionScores).length ? `<p style="font-size:12px;font-weight:600;margin-top:var(--ng-space-2);">Question Scores:</p><pre class="muted" style="font-size:11px;overflow:auto;max-height:120px;">${JSON.stringify(a.questionScores, null, 2)}</pre>` : ''}
+    </div>`).join('') : '<p class="muted">No attempts.</p>';
   $('#dialog-attempt-history').showModal();
 }
 
@@ -1631,7 +1634,7 @@ async function finishQuiz() {
   clearInterval(timerInterval);
   const { course, attempt, questions, answers, startedAt } = quizState;
   const durationSeconds = (attempt.durationSeconds || 0) + Math.floor((Date.now() - startedAt) / 1000);
-  const { score } = scoreAttempt(questions, answers);
+  const { score, questionScores } = scoreAttempt(questions, answers);
   const passed = score >= course.minScore;
   const completedAt = new Date().toISOString();
 
@@ -1639,6 +1642,7 @@ async function finishQuiz() {
     await updateAttempt(attempt.id, {
       durationSeconds,
       answers,
+      questionScores,
       score,
       passed,
       completedAt,
