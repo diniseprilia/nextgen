@@ -1143,14 +1143,23 @@ function renderAnalyticsResults() {
   if (!course) { panel.innerHTML = '<p class="muted">No course selected.</p>'; return; }
   const team = getTeams().find((t) => t.id === analyticsTeamId) || getTeams()[0];
   panel.innerHTML = `<div class="ng-table-wrap"><table class="ng-table data-table"><thead><tr>
-    <th>Team member</th><th>Progress</th><th>Attempts</th><th>Time</th><th></th></tr></thead><tbody>
+    <th>Team member</th><th>Progress</th><th>Attempts</th><th>Time</th><th>Last Attempt Time</th><th></th></tr></thead><tbody>
     ${(team?.members || []).map((uid) => {
     const u = getUserById(uid);
     const attempts = getAllAttemptsForUserCourse(uid, courseId);
     const { status } = getCourseProgressStatus(uid, courseId);
     const prog = attempts.length ? status : '—';
+    const sortedAttempts = [...attempts].sort((a, b) => {
+      const tA = new Date(a.completedAt || a.updatedAt || a.timestamp || a.openedAt || a.createdAt || 0);
+      const tB = new Date(b.completedAt || b.updatedAt || b.timestamp || b.openedAt || b.createdAt || 0);
+      return tB - tA;
+    });
+    const latestAttempt = sortedAttempts[0];
+    const lastAttemptDate = latestAttempt ? (latestAttempt.completedAt || latestAttempt.updatedAt || latestAttempt.timestamp || latestAttempt.openedAt || latestAttempt.createdAt) : null;
+    const lastAttemptTimeDisplay = lastAttemptDate ? new Date(lastAttemptDate).toLocaleString() : '—';
     return `<tr><td>${u?.name || uid}</td><td><span class="ng-badge ${statusBadge(prog)}">${prog}</span></td>
       <td>${attempts.filter((a) => a.completedAt).length}</td><td>${formatDuration(attempts.reduce((s, a) => s + (a.durationSeconds || 0), 0))}</td>
+      <td>${lastAttemptTimeDisplay}</td>
       <td><button type="button" class="ng-btn-link" data-history="${uid}">Answer history</button></td></tr>`;
   }).join('')}</tbody></table></div>`;
   panel.querySelectorAll('[data-history]').forEach((btn) => btn.onclick = () => showAttemptHistory(btn.dataset.history, courseId));
@@ -1198,7 +1207,9 @@ function teamNamesForUser(user) {
 function renderUsers() {
   const isAdm = canManageAdmins(currentUser);
   const canInvite = canInviteUsers(currentUser);
+  const canAddTeam = canInvite;
   $('#btn-invite-user')?.classList.toggle('hidden', !canInvite);
+  $('#btn-add-team')?.classList.toggle('hidden', !canAddTeam);
 
   $$('#users-segments .ng-superadmin-only').forEach((el) => el.classList.toggle('hidden', !isAdm));
 
@@ -1233,8 +1244,8 @@ function renderUsers() {
     };
   });
 
-  $('#users-list').innerHTML = `<div class="ng-table-wrap"><table class="ng-table data-table"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Teams</th></tr></thead><tbody>
-    ${getUsers().map((u) => `<tr><td>${u.name}</td><td>${u.email}</td><td><span class="ng-badge ng-badge--muted">${u.role}</span></td><td>${teamNamesForUser(u)}</td></tr>`).join('')}
+  $('#users-list').innerHTML = `<div class="ng-table-wrap"><table class="ng-table data-table"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Teams</th><th>Last Login Time</th></tr></thead><tbody>
+    ${getUsers().map((u) => `<tr><td>${u.name}</td><td>${u.email}</td><td><span class="ng-badge ng-badge--muted">${u.role}</span></td><td>${teamNamesForUser(u)}</td><td>${u.lastLogin ? new Date(u.lastLogin).toLocaleString() : '—'}</td></tr>`).join('')}
   </tbody></table></div>`;
 
   if (isAdm) {
