@@ -6,12 +6,14 @@ export const ROUTES = {
   teamMaterials: '/teamboard/materials',
   analytics: '/analytics',
   userandroles: '/userandroles',
+  systemlogs: '/systemlogs',
   settings: '/settings',
 };
 
 const PAGE_TO_PATH = {
   '#page-dashboard': ROUTES.dashboard,
   '#page-users': ROUTES.userandroles,
+  '#page-system-logs': ROUTES.systemlogs,
   '#page-settings': ROUTES.settings,
 };
 
@@ -65,6 +67,7 @@ export function parsePath(pathname) {
   if (path === '/') return { page: '#page-dashboard' };
   if (path === ROUTES.dashboard) return { page: '#page-dashboard' };
   if (path === ROUTES.userandroles) return { page: '#page-users' };
+  if (path === ROUTES.systemlogs) return { page: '#page-system-logs' };
   if (path === ROUTES.settings) return { page: '#page-settings' };
 
   const segments = path.split('/').filter(Boolean);

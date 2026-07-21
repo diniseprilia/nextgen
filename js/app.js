@@ -7,6 +7,7 @@ import { logout, getCurrentUser, checkSession, refreshCurrentUser, setCurrentUse
 import { generateQuestions, scoreAttempt, formatDuration, normalizeFormats, isShortAnswerQuestion, isAnswerCorrect, evaluateQuestionFraction } from './quiz.js';
 import { drawBarChart, drawProgressRings, drawLineChart } from './charts.js';
 import { parsePath, syncUrl, getPathForNav, resolveTeamId } from './router.js';
+import { fetchSystemLogs, toggleDebugMode, clearSystemLogs, connectLogStream } from './logs-api.js';
 
 let currentUser = null;
 let selectedTeamId = null;
@@ -23,6 +24,7 @@ const PAGE_TITLES = {
   '#page-team': 'Team Board',
   '#page-analytics': 'Analytics',
   '#page-users': 'Users & Roles',
+  '#page-system-logs': 'System Logs',
   '#page-settings': 'Settings',
   '#page-quiz': 'Course',
   '#page-course-result': 'Course Result',
@@ -35,10 +37,11 @@ const NAV_ICON = {
   team: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>',
   analytics: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>',
   users: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  systemlogs: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
   settings: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>',
 };
 
-const ADMIN_PAGES = new Set(['#page-users', '#page-settings']);
+const ADMIN_PAGES = new Set(['#page-users', '#page-system-logs', '#page-settings']);
 
 const scoreOf = (userId) => getUserAverageScore(userId);
 const teamScoreOf = (teamId) => (userId) => getUserAverageScoreForTeam(userId, teamId, getCourses());
@@ -55,6 +58,7 @@ function getMgmtNavLinks() {
   if (isAdmin(currentUser)) {
     links.push(
       { page: '#page-users', label: 'Users & Roles', icon: NAV_ICON.users },
+      { page: '#page-system-logs', label: 'System Logs', icon: NAV_ICON.systemlogs },
       { page: '#page-settings', label: 'Settings', icon: NAV_ICON.settings },
     );
   }
@@ -200,6 +204,7 @@ function navigate(page, { teamTab, teamId, replace = false, skipHistory = false 
       break;
     case '#page-analytics': renderAnalytics().catch(console.error); break;
     case '#page-users': renderUsers(); break;
+    case '#page-system-logs': renderSystemLogs().catch(console.error); break;
     case '#page-settings': renderSettings(); break;
   }
   if (!skipHistory) {
@@ -1679,6 +1684,57 @@ function bindEvents() {
     showToast('✓ Settings saved');
   };
 
+  $('#debug-mode-toggle')?.addEventListener('change', async (e) => {
+    try {
+      await toggleDebugMode(e.target.checked);
+      showToast(`✓ Debug Mode turned ${e.target.checked ? 'ON' : 'OFF'}`);
+    } catch (err) {
+      e.target.checked = !e.target.checked;
+      await appAlert(err.message);
+    }
+  });
+
+  $('#btn-pause-stream')?.addEventListener('click', () => {
+    isStreamPaused = !isStreamPaused;
+    const btn = $('#btn-pause-stream');
+    if (btn) btn.textContent = isStreamPaused ? 'Resume' : 'Pause';
+    const pillText = $('#live-stream-text');
+    const pillStatus = $('#live-stream-status');
+    if (pillText) pillText.textContent = isStreamPaused ? 'Stream Paused' : 'Live Stream Active';
+    if (pillStatus) pillStatus.classList.toggle('ng-status-pill--active', !isStreamPaused);
+  });
+
+  $('#btn-clear-logs')?.addEventListener('click', async () => {
+    try {
+      await clearSystemLogs();
+      logList = [];
+      renderLogConsole();
+      updateLevelCounters({ ERROR: 0, WARN: 0, INFO: 0, DEBUG: 0 });
+      showToast('✓ Logs cleared');
+    } catch (err) {
+      await appAlert(err.message);
+    }
+  });
+
+  $('#log-search-input')?.addEventListener('input', () => {
+    renderLogConsole();
+  });
+
+  $$('.ng-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const level = chip.dataset.level;
+      if (!level) return;
+      if (activeLogLevels.has(level)) {
+        activeLogLevels.delete(level);
+        chip.classList.remove('active');
+      } else {
+        activeLogLevels.add(level);
+        chip.classList.add('active');
+      }
+      renderLogConsole();
+    });
+  });
+
   $('#toggle-api-key').onclick = () => {
     const input = $('#gemini-api-key');
     const show = input.type === 'password';
@@ -1836,6 +1892,132 @@ function bindEvents() {
       await appAlert(err.message);
     }
   });
+}
+
+let logStreamEventSource = null;
+let isStreamPaused = false;
+let activeLogLevels = new Set(['ERROR', 'WARN', 'INFO', 'DEBUG']);
+let logList = [];
+
+async function renderSystemLogs() {
+  if (!isAdmin(currentUser)) {
+    await appAlert('Access denied. Admin role required.');
+    navigate('#page-dashboard');
+    return;
+  }
+
+  showLoader(true, 'Loading System Logs...');
+  try {
+    const data = await fetchSystemLogs({ limit: 200 });
+    showLoader(false);
+
+    logList = data.logs || [];
+
+    const debugToggle = $('#debug-mode-toggle');
+    if (debugToggle) {
+      debugToggle.checked = Boolean(data.isDebugMode);
+    }
+
+    updateLevelCounters(data.levelCounts || {});
+    renderLogConsole();
+    initLogStream();
+  } catch (err) {
+    showLoader(false);
+    await appAlert(`Failed to load system logs: ${err.message}`);
+  }
+}
+
+function updateLevelCounters(counts = {}) {
+  if ($('#count-error')) $('#count-error').textContent = counts.ERROR || 0;
+  if ($('#count-warn')) $('#count-warn').textContent = counts.WARN || 0;
+  if ($('#count-info')) $('#count-info').textContent = counts.INFO || 0;
+  if ($('#count-debug')) $('#count-debug').textContent = counts.DEBUG || 0;
+}
+
+function renderLogConsole() {
+  const streamBody = $('#log-stream-list');
+  const searchVal = $('#log-search-input')?.value?.toLowerCase()?.trim() || '';
+  if (!streamBody) return;
+
+  const filteredLogs = logList.filter((log) => {
+    if (!activeLogLevels.has(log.level)) return false;
+    if (!searchVal) return true;
+    const msg = (log.message || '').toLowerCase();
+    const url = (log.meta?.url || '').toLowerCase();
+    const email = (log.meta?.userEmail || '').toLowerCase();
+    return msg.includes(searchVal) || url.includes(searchVal) || email.includes(searchVal);
+  });
+
+  if (filteredLogs.length === 0) {
+    streamBody.innerHTML = '<div class="ng-log-empty">No log entries matching criteria.</div>';
+    if ($('#log-total-counter')) $('#log-total-counter').textContent = 'Showing 0 logs';
+    return;
+  }
+
+  streamBody.innerHTML = '';
+  filteredLogs.forEach((log) => appendLogRow(streamBody, log));
+
+  if ($('#log-total-counter')) {
+    $('#log-total-counter').textContent = `Showing ${filteredLogs.length} of ${logList.length} logs`;
+  }
+}
+
+function appendLogRow(container, log) {
+  const row = document.createElement('div');
+  row.className = `ng-log-row row-${log.level}`;
+
+  const timeStr = new Date(log.timestamp).toLocaleTimeString();
+  const methodStr = log.meta?.method ? `${log.meta.method} ${log.meta.url || ''}` : '-';
+  const durationStr = log.meta?.responseTimeMs !== undefined && log.meta?.responseTimeMs !== null ? `${log.meta.responseTimeMs}ms` : '-';
+  const userStr = log.meta?.userEmail || (log.meta?.userId ? log.meta.userId.substring(0, 8) : 'Guest');
+
+  row.innerHTML = `
+    <span class="col-time">${timeStr}</span>
+    <span class="col-level"><span class="ng-chip ng-chip--${log.level.toLowerCase()} active">${log.level}</span></span>
+    <span class="col-category">${log.category || 'HTTP'}</span>
+    <span class="col-method">${methodStr}</span>
+    <span class="col-duration">${durationStr}</span>
+    <span class="col-user">${userStr}</span>
+    <span class="col-msg">${log.message}</span>
+  `;
+
+  row.addEventListener('click', () => {
+    const nextEl = row.nextElementSibling;
+    if (nextEl && nextEl.classList.contains('ng-log-details')) {
+      nextEl.remove();
+      return;
+    }
+    const details = document.createElement('div');
+    details.className = 'ng-log-details';
+    details.textContent = JSON.stringify(log, null, 2);
+    row.after(details);
+  });
+
+  container.appendChild(row);
+}
+
+function initLogStream() {
+  if (logStreamEventSource) return;
+
+  logStreamEventSource = connectLogStream(
+    (log) => {
+      if (log.type === 'connected') return;
+      if (isStreamPaused) return;
+
+      logList.unshift(log);
+      if (logList.length > 500) logList.pop();
+
+      if ($('#page-system-logs') && !$('#page-system-logs').classList.contains('hidden')) {
+        renderLogConsole();
+      }
+    },
+    (_err) => {
+      const pillText = $('#live-stream-text');
+      const pillStatus = $('#live-stream-status');
+      if (pillText) pillText.textContent = 'Stream Disconnected';
+      if (pillStatus) pillStatus.classList.remove('ng-status-pill--active');
+    }
+  );
 }
 
 async function init() {

@@ -155,6 +155,63 @@
           </div>
         </section>
 
+        <section id="page-system-logs" class="page hidden">
+          <div class="ng-log-toolbar">
+            <div class="ng-log-toolbar-group">
+              <label class="ng-toggle-label">
+                <span>Debug Mode</span>
+                <input type="checkbox" id="debug-mode-toggle" class="ng-toggle-input" />
+                <span class="ng-toggle-slider"></span>
+              </label>
+              <div id="live-stream-status" class="ng-status-pill ng-status-pill--active">
+                <span class="ng-pulse-dot"></span>
+                <span id="live-stream-text">Live Stream Active</span>
+              </div>
+            </div>
+
+            <div class="ng-log-toolbar-filters">
+              <div class="ng-level-chips">
+                <button type="button" class="ng-chip ng-chip--error active" data-level="ERROR">
+                  ERROR <span id="count-error" class="ng-chip-count">0</span>
+                </button>
+                <button type="button" class="ng-chip ng-chip--warn active" data-level="WARN">
+                  WARN <span id="count-warn" class="ng-chip-count">0</span>
+                </button>
+                <button type="button" class="ng-chip ng-chip--info active" data-level="INFO">
+                  INFO <span id="count-info" class="ng-chip-count">0</span>
+                </button>
+                <button type="button" class="ng-chip ng-chip--debug active" data-level="DEBUG">
+                  DEBUG <span id="count-debug" class="ng-chip-count">0</span>
+                </button>
+              </div>
+              <div class="ng-search-box">
+                <input type="text" id="log-search-input" class="ng-input" placeholder="Search logs, endpoints..." />
+              </div>
+              <button type="button" id="btn-pause-stream" class="ng-btn ng-btn--outline">Pause</button>
+              <button type="button" id="btn-clear-logs" class="ng-btn ng-btn--outline">Clear</button>
+            </div>
+          </div>
+
+          <div class="ng-log-console-container">
+            <div class="ng-log-table-header">
+              <span class="col-time">Timestamp</span>
+              <span class="col-level">Level</span>
+              <span class="col-category">Category</span>
+              <span class="col-method">Endpoint</span>
+              <span class="col-duration">Duration</span>
+              <span class="col-user">User</span>
+              <span class="col-msg">Message</span>
+            </div>
+            <div id="log-stream-list" class="ng-log-stream-body">
+              <div class="ng-log-empty">No log entries captured yet.</div>
+            </div>
+            <div class="ng-log-console-footer">
+              <span id="log-total-counter">Showing 0 logs</span>
+              <span class="muted">Auto-scroll enabled</span>
+            </div>
+          </div>
+        </section>
+
         <section id="page-course-result" class="page hidden">
           <nav class="ng-breadcrumb" id="course-result-breadcrumb"></nav>
           <div id="course-result-content"></div>

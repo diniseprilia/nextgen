@@ -20,6 +20,7 @@ The system supports three user roles with granular permission levels. Notably, *
 | **Manage Courses** (Create, Delete, Save Draft, Publish, Open/Close dates) | No | **Yes** | **Yes** |
 | **Manage Materials** (Group, Upload, Sync URLs, Delete) | No | **Yes** | **Yes** |
 | **Monitor Results & Performance** (Individual & Question-level) | No | **Yes** | **Yes** |
+| **System Logs & Audit Console** (Live streaming, search, debug mode) | No | No | **Yes** |
 | **Settings** (Gemini API key) | No | No | **Yes** |
 
 ---
@@ -149,7 +150,7 @@ Home / Login
 **Notes:**
 * Course management actions (**create**, **edit**, **publish**, **remove**) are available from the **course dialog** (Create course / Edit course). The course list shows **Review** and **Edit** only.
 * The **Materials** tab (library & ingestion) is visible on Team Board for **Master and Admin only**.
-* **Users & Roles** and **Settings** are **Admin-only** top-level sidebar items. **Analytics** is available to both Master and Admin.
+* **Users & Roles**, **System Logs**, and **Settings** are **Admin-only** top-level sidebar items. **Analytics** is available to both Master and Admin.
 
 ### Application URLs
 
@@ -164,6 +165,7 @@ The SPA uses path-based URLs (History API). Refreshing the browser keeps the use
 | Team Board → Materials | `/teamboard/materials/{team-slug}` |
 | Analytics | `/analytics/{team-slug}` |
 | Users & Roles | `/userandroles` |
+| System Logs | `/systemlogs` |
 | Settings | `/settings` |
 
 `{team-slug}` is the team name lowercased with spaces replaced by hyphens (e.g. **Ops Fleet Hub** → `ops-fleet-hub`).
@@ -412,6 +414,17 @@ Accessible to Admins at `/userandroles`. Provides centralized management across 
 *   **Teams Tab**: View teams, member counts, assigned Master, and team creation/deletion options.
 *   **All Users Tab**: Displays all registered users with columns: **Name**, **Email**, **Role**, **Teams**, and **Last Login Time** (showing the latest successful sign-in timestamp or `—`).
 *   **Admins Tab**: Displays current Admins and provides controls for assigning or revoking Admin privileges.
+
+---
+
+### 4.8 System Logs & Real-Time Audit Console (Admin)
+
+Accessible to Admins at `/systemlogs`. Provides real-time observability, HTTP request logging, error tracking, and system audit capabilities:
+*   **Real-Time Streaming**: Establishes a persistent Server-Sent Events (SSE) connection (`/api/admin/logs/stream`) to stream new system events live to the console.
+*   **Log Level Filtering**: Interactive chip filters for `ERROR`, `WARN`, `INFO`, and `DEBUG` levels with live counter badges.
+*   **Search & Inspection**: Full-text filter bar searching messages, request URLs, and user emails. Clicking any log row expands an inline JSON detail view.
+*   **Debug Mode Toggle**: Enables verbose debug logging across application services.
+*   **Log Management**: Provides a `Clear logs` action to flush log history from storage.
 
 ---
 
@@ -674,6 +687,29 @@ Quiz attempts are stored in **MongoDB** and keyed by `userId` + `courseId`.
 { "question": "…", "correctAnswer": "expected text", "explanation": "…", "format": "short" }
 ```
 
-### 5.11 Browser `localStorage` (legacy fallback)
+### 5.11 Collection: `systemlogs`
+
+System logs and audit trails are stored in **MongoDB**.
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `level` | String | Log level: `ERROR`, `WARN`, `INFO`, or `DEBUG` |
+| `message` | String | Log message summary |
+| `category` | String | Subsystem category (`HTTP`, `Auth`, `Course`, `System`) |
+| `meta` | Object | Request metadata (method, URL, status, response time ms, user email, IP, error stack) |
+| `timestamp` | Date | Log timestamp (indexed for TTL retention and time range queries) |
+
+**Indexes:** `{ timestamp: -1 }`, `{ level: 1 }`
+
+### 5.12 System Logs REST API (Admin)
+
+| Method | Endpoint | Auth | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/admin/logs` | Admin | List recent logs with filters (limit, level, search) |
+| `GET` | `/api/admin/logs/stream` | Admin | Real-time Server-Sent Events (SSE) log stream |
+| `POST` | `/api/admin/logs/debug-mode` | Admin | Toggle application-wide debug logging mode |
+| `DELETE` | `/api/admin/logs` | Admin | Flush all log history |
+
+### 5.13 Browser `localStorage` (legacy fallback)
 
 When the API server is unreachable, courses and attempts fall back to `nextgen_courses` and `nextgen_attempts` in browser `localStorage` (seed data on first boot). **Sign-in and cross-user sync require the server.**

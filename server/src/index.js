@@ -13,6 +13,8 @@ import usersRouter from './routes/users.js';
 import teamsRouter from './routes/teams.js';
 import coursesRouter from './routes/courses.js';
 import attemptsRouter from './routes/attempts.js';
+import logsRouter from './routes/logs.js';
+import { requestLogger } from './middleware/requestLogger.js';
 import { Material } from './models/Material.js';
 import { Course } from './models/Course.js';
 import { Team } from './models/Team.js';
@@ -27,6 +29,8 @@ app.set('trust proxy', true);
 app.use(cors({ origin: true, credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
+app.use(requestLogger);
+
 app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/teams', teamsRouter);
@@ -34,6 +38,7 @@ app.use('/api/materials', materialsRouter);
 app.use('/api/courses', coursesRouter);
 app.use('/api/attempts', attemptsRouter);
 app.use('/api/questions', questionsRouter);
+app.use('/api/admin/logs', logsRouter);
 app.use(
   '/vendor/auth0',
   express.static(path.join(__dirname, '../node_modules/@auth0/auth0-spa-js/dist')),
@@ -46,7 +51,7 @@ app.use(express.static(rootDir, {
   },
 }));
 
-const SPA_ROUTE_PATTERN = /^\/(dashboard|userandroles|settings|analytics(?:\/[^/]+)?|teamboard(?:\/(?:courses|teammates|materials)(?:\/[^/]+)?)?)$/;
+const SPA_ROUTE_PATTERN = /^\/(dashboard|userandroles|systemlogs|settings|analytics(?:\/[^/]+)?|teamboard(?:\/(?:courses|teammates|materials)(?:\/[^/]+)?)?)$/;
 
 app.get(SPA_ROUTE_PATTERN, (_req, res) => {
   res.sendFile(path.join(rootDir, 'index.html'));
