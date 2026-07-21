@@ -105,8 +105,8 @@ router.post('/', async (req, res) => {
     });
     res.status(201).json(toApiCourse(course));
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to create course' });
+    console.error('Failed to create course:', err);
+    res.status(500).json({ error: err.message || 'Failed to create course' });
   }
 });
 
@@ -123,8 +123,8 @@ router.put('/:id', async (req, res) => {
     if (!course) return res.status(404).json({ error: 'Course not found' });
     res.json(toApiCourse(course));
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to update course' });
+    console.error('Failed to update course:', err);
+    res.status(500).json({ error: err.message || 'Failed to update course' });
   }
 });
 

@@ -5,10 +5,14 @@ const questionSchema = new mongoose.Schema(
     id: { type: String, required: true },
     question: { type: String, required: true },
     options: { type: [String], default: undefined },
-    correctAnswer: { type: mongoose.Schema.Types.Mixed, required: true },
+    correctAnswer: { type: mongoose.Schema.Types.Mixed, default: null },
     acceptableAnswers: { type: [String], default: undefined },
+    referenceAnswer: { type: String, default: undefined },
+    rubricPoints: { type: [String], default: undefined },
+    matchingPairs: { type: [mongoose.Schema.Types.Mixed], default: undefined },
+    correctAnswers: { type: [Number], default: undefined },
     explanation: { type: String, default: '' },
-    format: { type: String, enum: ['multiple', 'truefalse', 'short'], default: 'multiple' },
+    format: { type: String, enum: ['multiple', 'truefalse', 'short', 'essay', 'matching', 'multi_select'], default: 'multiple' },
   },
   { _id: false }
 );
