@@ -1,0 +1,7 @@
+description: >
+  NextGen is Ninja Van's rookie learning portal: new hires sign in with company
+  Google SSO, study materials (files and Confluence links), take quizzes, and
+  track team progress. Masters and Admins manage teams, courses, and question
+  generation. For Ninja Van rookies, team leads, and training admins.
+
+database: oceanbase
