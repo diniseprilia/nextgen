@@ -13,7 +13,7 @@ export const config = {
   auth0ClientSecret: (process.env.AUTH0_CLIENT_SECRET || '').trim(),
   auth0CallbackUrl: (process.env.AUTH0_CALLBACK_URL || '').trim(),
   auth0GoogleConnection: (process.env.AUTH0_GOOGLE_CONNECTION || 'google-oauth2').trim(),
-  sessionSecret: process.env.SESSION_SECRET || 'nextgen-dev-session-secret-change-me',
+  sessionSecret: process.env.SESSION_SECRET || process.env.JWT_SECRET || 'nextgen-dev-session-secret-change-me',
   allowedDomain: process.env.ALLOWED_EMAIL_DOMAIN || 'ninjavan.co',
   emailAllowlist: (process.env.EMAIL_ALLOWLIST || 'diniseprilia@gmail.com')
     .split(',')

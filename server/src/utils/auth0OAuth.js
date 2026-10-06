@@ -8,6 +8,8 @@ function requireAuth0Config() {
 
 export function getAuth0CallbackUrl(req) {
   if (config.auth0CallbackUrl) return config.auth0CallbackUrl;
+  const appUrl = (process.env.APP_URL || '').trim().replace(/\/$/, '');
+  if (appUrl) return `${appUrl}/api/auth/oauth/callback`;
   const protocol = req.get('x-forwarded-proto') || req.protocol;
   const host = req.get('x-forwarded-host') || req.get('host');
   return `${protocol}://${host}/api/auth/oauth/callback`;

@@ -107,7 +107,10 @@ router.get('/logout', (req, res) => {
   if (!authConfigured()) {
     return res.redirect('/');
   }
-  const returnTo = `${req.protocol}://${req.get('host')}/`;
+  const appUrl = (process.env.APP_URL || '').trim().replace(/\/$/, '');
+  const protocol = req.get('x-forwarded-proto') || req.protocol;
+  const host = req.get('x-forwarded-host') || req.get('host');
+  const returnTo = `${appUrl || `${protocol}://${host}`}/`;
   res.redirect(buildLogoutUrl(returnTo));
 });
 

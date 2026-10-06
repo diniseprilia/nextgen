@@ -31,6 +31,10 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(requestLogger);
 
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/teams', teamsRouter);
@@ -248,13 +252,17 @@ async function seedCoursesIfEmpty() {
 
 async function start() {
   await connectDb();
-  await ensureBucket();
+  try {
+    await ensureBucket();
+  } catch (err) {
+    console.warn('MinIO is unavailable; file uploads will fail until it is configured:', err.message);
+  }
   await seedUsersAndTeams();
   await seedMaterialsIfEmpty();
   await seedCoursesIfEmpty();
   await backfillTeamIds();
 
-  app.listen(config.port, () => {
+  app.listen(config.port, '0.0.0.0', () => {
     console.log(`NextGen server running at http://localhost:${config.port}`);
   });
 }
